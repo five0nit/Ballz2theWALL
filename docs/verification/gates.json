@@ -1,0 +1,140 @@
+{
+  "verified_at": "2026-09-14T23:23:09.309377+00:00",
+  "source_tests": {
+    "python": "3.13.14",
+    "tests": 376,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "installed_tests": {
+    "python": "3.11.15",
+    "tests": 376,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "installed_package_smoke": {
+    "package": "/tmp/ballz-final-wheel-py311/lib/python3.11/site-packages/ballz2thewall/__init__.py",
+    "python": "3.11.15",
+    "adapters": [
+      {
+        "adapter": "hermes",
+        "roundtrip": "passed",
+        "launch": "dry_run_only"
+      },
+      {
+        "adapter": "codex",
+        "roundtrip": "passed",
+        "launch": "dry_run_only"
+      },
+      {
+        "adapter": "claude",
+        "roundtrip": "passed",
+        "launch": "dry_run_only"
+      }
+    ],
+    "bundled_skill_roundtrip": "passed"
+  },
+  "ruff": "All checks passed!",
+  "native": {
+    "hermes": {
+      "adapter": "hermes",
+      "executable": "/home/fiv30nit/.local/bin/hermes",
+      "version": "0.21.1",
+      "tested_version": "0.21.1",
+      "native_flag": "--yolo",
+      "flag_supported": true,
+      "status": "ready",
+      "auth": "not_probed",
+      "version_match": true,
+      "effective_native_config": {
+        "mode": "off",
+        "cron": "approve",
+        "single": "approve",
+        "unattended": "approve",
+        "terminal": "local",
+        "private_urls": true
+      },
+      "isolated_apply_rollback": "passed"
+    },
+    "codex": {
+      "adapter": "codex",
+      "executable": "/home/fiv30nit/.npm-global/bin/codex",
+      "version": "0.152.0",
+      "tested_version": "0.152.0",
+      "native_flag": "--dangerously-bypass-approvals-and-sandbox",
+      "flag_supported": true,
+      "status": "ready",
+      "auth": "not_probed",
+      "version_match": true,
+      "native_parser": "accepted generated config; rejected invalid-policy control",
+      "isolated_apply_rollback": "passed"
+    },
+    "claude": {
+      "adapter": "claude",
+      "executable": "/home/fiv30nit/.npm-global/bin/claude",
+      "version": "2.1.201",
+      "tested_version": "2.1.201",
+      "native_flag": "--dangerously-skip-permissions",
+      "flag_supported": true,
+      "status": "ready",
+      "auth": "not_probed",
+      "version_match": true,
+      "native_parser": "not_verified; CLI help is not a settings-schema check",
+      "isolated_apply_rollback": "passed"
+    },
+    "model_execution": "not_tested",
+    "browser_authentication": "not_tested"
+  },
+  "schemas": [
+    {
+      "adapter": "codex",
+      "source": "https://developers.openai.com/codex/config-schema.json",
+      "schema_sha256": "2e1fcf1cbb20f255c3baca2e174b4a3c954cef577a130587b8935e2d12c8ade6",
+      "valid_config": "passed",
+      "invalid_policy_control": "rejected",
+      "scope": "schema validation; not live model execution"
+    },
+    {
+      "adapter": "claude",
+      "source": "https://www.schemastore.org/claude-code-settings.json",
+      "schema_sha256": "6d4a6e3c7adedffce8079ccaef0a4bab5f5718b054421b4475c788a0ae4bedfe",
+      "valid_config": "passed",
+      "invalid_policy_control": "rejected",
+      "scope": "schema validation; not live model execution"
+    }
+  ],
+  "browser": {
+    "connected": true,
+    "browser": "Chrome/147.0.7727.55",
+    "protocol_version": "1.3",
+    "error": null,
+    "scope": "temporary empty profile; version metadata only",
+    "authentication": "not_tested",
+    "process_group_and_profile_cleanup": "passed"
+  },
+  "source_sha256": {
+    "src/ballz2thewall/__init__.py": "f2495908e5dfaf20e026c62d1aec9695fc38723e0daa786b955c0acd285b273b",
+    "src/ballz2thewall/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/ballz2thewall/adapters.py": "164b6396ff4a643f318eada6d9aaa32d6b4af66126af6f973dcf15cc41bca9d2",
+    "src/ballz2thewall/browser.py": "be998b809b9a12ef5675e78973b14277ac74046100d8d594ba8d0d33c607b2ec",
+    "src/ballz2thewall/cli.py": "f2ca021be71628ef0188af8f35f5c07982887d31351e780ee4f5ad8483ab9c05",
+    "src/ballz2thewall/config.py": "a8223ebdecb1ba499c96f008e9818eb9b43f614a2a9779a8e5aea94cda40c905",
+    "src/ballz2thewall/credentials.py": "1e71c2ba3a4df21035dd927bb94c51e7d54c41b7e5bdc4e78649bed3d9f8e9c3",
+    "src/ballz2thewall/doctor.py": "d860b2729d44baf9a6e97afbf92535b5c78d331cef85b4ee303dc2c6cbbe8fa1",
+    "src/ballz2thewall/store.py": "27593e95db93da29f2046c2365e02724b944859cff5c47751d8a5f933338d2ce",
+    "scripts/native_smoke.py": "2505d1ca0f2adb45e09c94549eb284e2837798cb6d74692b23a696db9364f8f8",
+    "scripts/package_smoke.py": "abebd8ac1919b361fc2a80001286acec782a6cd2de097b019a4febc1134755f6",
+    "tests/test_browser.py": "bfa973189fb0702118258623913b4a46fc4b272d56dbd1c84fd6cde6f94c6322",
+    "tests/test_cli.py": "4c2188890d6ced0db15df265c9ab7f70857112bd4ab585a8fe16dd88b74087e5",
+    "tests/test_config_regressions.py": "9ba67dde587e9acd6a24b6fa9fdad7a01a57c88674c2182d82dd5d7b4b858e81",
+    "tests/test_core.py": "1594b65398af4cdce08bcc2aef29b9726e5955560c7f06ac7e20cf12377f2960",
+    "tests/test_credentials.py": "2202780ce661bffce2f1142a16fbae795badcac5f01b797402402fd54e6f9b45",
+    "tests/test_final_review.py": "bef2da2e891b73361c6cfa6c465a3449a72f0422242b2de299b7cf3f616861b4",
+    "tests/test_regressions.py": "6fb6e43a8394bd51610147fdd30addf98f96116084ae0560dfdbf1f9ae93c85f"
+  },
+  "activation": "not_performed",
+  "publication": "not_performed",
+  "review": "direct local review; no independent delegated signoff claimed"
+}

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ballz2thewall"
+version = "0.1.0"
+description = "Full-access runtime profiles. Native adapters. Receipts, not magic prompts."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Michael Costea"}]
+dependencies = ["PyYAML>=6.0.2,<7", "tomlkit>=0.13.2,<1"]
+classifiers = ["Development Status :: 3 - Alpha", "Operating System :: POSIX :: Linux", "Programming Language :: Python :: 3"]
+
+[project.optional-dependencies]
+keyring = ["keyring>=25,<26"]
+dev = ["pytest>=8,<10", "ruff>=0.12,<1", "build>=1.2,<2"]
+
+[project.scripts]
+ballz = "ballz2thewall.cli:main"
+ballz2thewall = "ballz2thewall.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ballz2thewall"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
