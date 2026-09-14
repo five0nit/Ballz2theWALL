@@ -5,7 +5,7 @@
 A local-first skill + CLI that puts agent runtimes into their native full-access
 modes. Hermes first. OpenAI Codex and Anthropic Claude Code included.
 
-**Status: 0.1.0 alpha.** Python 3.11+. Linux/WSL tested; POSIX implementation,
+**Status: 0.1.1 alpha.** Python 3.11+. Linux/WSL tested; POSIX implementation,
 macOS unverified; native Windows writes are not supported yet. No hosted service,
 account, telemetry, scheduler or background daemon.
 
@@ -32,7 +32,7 @@ ballz run hermes --home "$HOME/.hermes" --cwd "$PWD" --interactive
 restart of existing gateways. A config write is not proof an already-running
 agent adopted it.
 
-Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.1.0-py3-none-any.whl`.
+Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.1.1-py3-none-any.whl`.
 No PyPI publication is claimed.
 
 ## One contract, three runtimes
@@ -62,6 +62,11 @@ ballz run hermes --home "$HOME/.hermes" --cwd "$PWD" --prompt-file task.txt --dr
 
 `run` does not persist config. Hermes run requires a local terminal backend; if
 that home explicitly configures Docker/SSH/Modal, apply the local profile first.
+Backend validation honors `terminal.backend` before legacy `terminal.env_type`.
+Stored messaging `terminal.cwd` does not block CLI launch: the selected `--cwd`
+is passed to the native process and `TERMINAL_CWD`. Explicit Hermes roots are
+pinned with `--profile default`; named profile homes retain their native pinning.
+Sticky `active_profile` markers are left untouched.
 Native deny rules, instruction-file guards, configured tools, hook trust,
 organization policies and provider-side rules are not rewritten. Operating-system
 access is that of the launching account, not automatic root/Administrator.
@@ -135,6 +140,9 @@ The state directory must be owned by the current user with mode `0700`.
 - Rollback restores the exact original or removes a file Ballz created.
 - Later edits cause a drift error, not a forced overwrite.
 - Prepared receipts support recovery if a process stops around the config write.
+- Rollback persists `rolling_back` before restoration; retry resumes after an
+  interruption. Already-restored originals (including 0.1.0 receipts) are
+  acknowledged without rewriting the target. Unrelated edits still fail on drift.
 - YAML/JSON formatting may change during apply. TOML comments are retained.
 - Backups can contain pre-existing secrets; keep the state directory local and
   out of version control. Receipts contain hashes and paths, not config contents.

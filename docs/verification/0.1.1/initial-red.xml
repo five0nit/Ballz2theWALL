@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="16" skipped="0" tests="23" time="0.900" timestamp="2026-09-15T09:32:38.833987+10:00" hostname="MikeNet"><testcase classname="tests.test_late_review" name="test_explicit_home_ignores_sticky_profile[False]" time="0.006"><failure message="AssertionError: assert ['chat', '--yolo'] == ['--profile', 'default']&#10;  &#10;  At index 0 diff: 'chat' != '--profile'&#10;  Use -v to get more diff">tests/test_late_review.py:29: in test_explicit_home_ignores_sticky_profile
+    assert result["argv"][1:3] == ["--profile", "default"]
+E   AssertionError: assert ['chat', '--yolo'] == ['--profile', 'default']
+E     
+E     At index 0 diff: 'chat' != '--profile'
+E     Use -v to get more diff</failure></testcase><testcase classname="tests.test_late_review" name="test_explicit_home_ignores_sticky_profile[True]" time="0.004" /><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal0-2]" time="0.003"><failure message="AssertionError: assert 0 == 2&#10; +  where 0 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc0', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc0', ...])&#10; +    where &lt;function main at 0x7ee940053c40&gt; = cli.main">tests/test_late_review.py:45: in test_native_terminal_precedence
+    assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),
+E   AssertionError: assert 0 == 2
+E    +  where 0 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc0', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc0', ...])
+E    +    where &lt;function main at 0x7ee940053c40&gt; = cli.main</failure></testcase><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal1-2]" time="0.003"><failure message="AssertionError: assert 0 == 2&#10; +  where 0 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc1', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc1', ...])&#10; +    where &lt;function main at 0x7ee940053c40&gt; = cli.main">tests/test_late_review.py:45: in test_native_terminal_precedence
+    assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),
+E   AssertionError: assert 0 == 2
+E    +  where 0 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc1', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc1', ...])
+E    +    where &lt;function main at 0x7ee940053c40&gt; = cli.main</failure></testcase><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal2-0]" time="0.002" /><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal3-2]" time="0.002" /><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal4-0]" time="0.002"><failure message="AssertionError: assert 2 == 0&#10; +  where 2 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc4', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc4', ...])&#10; +    where &lt;function main at 0x7ee940053c40&gt; = cli.main">tests/test_late_review.py:45: in test_native_terminal_precedence
+    assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),
+E   AssertionError: assert 2 == 0
+E    +  where 2 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc4', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc4', ...])
+E    +    where &lt;function main at 0x7ee940053c40&gt; = cli.main</failure></testcase><testcase classname="tests.test_late_review" name="test_native_terminal_precedence[terminal5-0]" time="0.002"><failure message="AssertionError: assert 2 == 0&#10; +  where 2 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc5', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc5', ...])&#10; +    where &lt;function main at 0x7ee940053c40&gt; = cli.main">tests/test_late_review.py:45: in test_native_terminal_precedence
+    assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),
+E   AssertionError: assert 2 == 0
+E    +  where 2 = &lt;function main at 0x7ee940053c40&gt;(['run', 'hermes', '--home', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc5', '--cwd', '/tmp/pytest-of-fiv30nit/pytest-272/test_native_terminal_precedenc5', ...])
+E    +    where &lt;function main at 0x7ee940053c40&gt; = cli.main</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[intent_before-False]" time="0.046"><failure message="Failed: DID NOT RAISE OSError">tests/test_late_review.py:104: in test_interrupted_rollback_retries
+    with pytest.raises(OSError, match="injected"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE OSError</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[intent_before-True]" time="0.060"><failure message="Failed: DID NOT RAISE OSError">tests/test_late_review.py:104: in test_interrupted_rollback_retries
+    with pytest.raises(OSError, match="injected"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE OSError</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[intent_after-False]" time="0.048"><failure message="Failed: DID NOT RAISE OSError">tests/test_late_review.py:104: in test_interrupted_rollback_retries
+    with pytest.raises(OSError, match="injected"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE OSError</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[intent_after-True]" time="0.066"><failure message="Failed: DID NOT RAISE OSError">tests/test_late_review.py:104: in test_interrupted_rollback_retries
+    with pytest.raises(OSError, match="injected"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE OSError</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[restore_before-False]" time="0.047" /><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[restore_before-True]" time="0.059" /><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[restore_after-False]" time="0.031"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:108: in test_interrupted_rollback_retries
+    result = Store(state.root).rollback(receipt["receipt_id"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[restore_after-True]" time="0.053"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:108: in test_interrupted_rollback_retries
+    result = Store(state.root).rollback(receipt["receipt_id"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[completion_before-False]" time="0.036"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:108: in test_interrupted_rollback_retries
+    result = Store(state.root).rollback(receipt["receipt_id"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[completion_before-True]" time="0.052"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:108: in test_interrupted_rollback_retries
+    result = Store(state.root).rollback(receipt["receipt_id"])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[completion_after-False]" time="0.049" /><testcase classname="tests.test_late_review" name="test_interrupted_rollback_retries[completion_after-True]" time="0.057" /><testcase classname="tests.test_late_review" name="test_legacy_interrupted_rollback_acknowledges_restored_bytes[False]" time="0.031"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:132: in test_legacy_interrupted_rollback_acknowledges_restored_bytes
+    assert state.rollback(receipt["receipt_id"])["status"] == "rolled_back"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_legacy_interrupted_rollback_acknowledges_restored_bytes[True]" time="0.038"><failure message="ValueError: Config drift detected; rollback would overwrite newer edits">tests/test_late_review.py:132: in test_legacy_interrupted_rollback_acknowledges_restored_bytes
+    assert state.rollback(receipt["receipt_id"])["status"] == "rolled_back"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/ballz2thewall/store.py:142: in rollback
+    raise ValueError("Config drift detected; rollback would overwrite newer edits")
+E   ValueError: Config drift detected; rollback would overwrite newer edits</failure></testcase><testcase classname="tests.test_late_review" name="test_rollback_rechecks_drift_after_intent" time="0.043"><failure message="Failed: DID NOT RAISE ValueError">tests/test_late_review.py:148: in test_rollback_rechecks_drift_after_intent
+    with pytest.raises(ValueError, match="drift"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError</failure></testcase></testsuite></testsuites>

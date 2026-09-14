@@ -24,7 +24,7 @@ def test_doctor_native_version(name, text, version, monkeypatch):
     assert report["version_match"]
 
 
-@pytest.mark.parametrize("setting", ["backend: docker", "backend: ssh", "cwd: /other/workspace"])
+@pytest.mark.parametrize("setting", ["backend: docker", "backend: ssh", "env_type: docker"])
 def test_run_rejects_conflicting_hermes_terminal(tmp_path, capsys, setting):
     (tmp_path / "config.yaml").write_text(f"terminal:\n  {setting}\n")
     assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),

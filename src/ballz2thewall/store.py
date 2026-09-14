@@ -119,7 +119,7 @@ class Store:
             if (type(record.get("schema")) is not int or record["schema"] != 1
                     or record.get("id") != receipt_id
                     or not isinstance(record.get("status"), str)
-                    or record["status"] not in {"applied", "prepared", "rolled_back"}
+                    or record["status"] not in {"applied", "prepared", "rolling_back", "rolled_back"}
                     or not isinstance(record.get("target"), str)
                     or "\x00" in record["target"] or not Path(record["target"]).is_absolute()
                     or not valid_hash(record.get("after_sha256"))
@@ -134,19 +134,31 @@ class Store:
                 if current_hash != record["before_sha256"]:
                     raise ValueError("Config drifted after rollback")
                 return {"status": "already_rolled_back", "target": str(target), "receipt_id": receipt_id}
+            if current_hash == record["before_sha256"]:
+                # A previous rollback (including v0.1.0) may have restored the
+                # target but failed its final receipt write. Acknowledge exact
+                # original bytes/absence without overwriting anything.
+                status = "not_applied" if record["status"] == "prepared" else "rolled_back"
+                record["status"] = "rolled_back"
+                self._save(record)
+                return {"status": status, "target": str(target), "receipt_id": receipt_id}
             if current_hash != record["after_sha256"]:
-                if record["status"] == "prepared" and current_hash == record["before_sha256"]:
-                    record["status"] = "rolled_back"
-                    self._save(record)
-                    return {"status": "not_applied", "target": str(target), "receipt_id": receipt_id}
                 raise ValueError("Config drift detected; rollback would overwrite newer edits")
-            if record["before_sha256"] is None:
-                target.unlink()
-                sync_dir(target.parent)
-            else:
+            before = None
+            if record["before_sha256"] is not None:
                 before = read_optional(self.root / f"{receipt_id}.before")
                 if before is None or digest(before) != record["before_sha256"]:
                     raise ValueError("Backup missing or corrupted")
+            # Persist intent before touching the target. A restarted Store can
+            # retry either side of the atomic restore using recorded hashes.
+            record["status"] = "rolling_back"
+            self._save(record)
+            if digest(read_optional(target)) != record["after_sha256"]:
+                raise ValueError("Config drift detected; rollback would overwrite newer edits")
+            if before is None:
+                target.unlink()
+                sync_dir(target.parent)
+            else:
                 atomic_write(target, before, mode=record["before_mode"])
             if digest(read_optional(target)) != record["before_sha256"]:
                 raise ValueError("Rollback verification failed")

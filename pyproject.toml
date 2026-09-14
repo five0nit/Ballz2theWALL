@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ballz2thewall"
-version = "0.1.0"
+version = "0.1.1"
 description = "Full-access runtime profiles. Native adapters. Receipts, not magic prompts."
 readme = "README.md"
 requires-python = ">=3.11"

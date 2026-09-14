@@ -3,7 +3,7 @@ name: ballz2thewall
 description: Use when enabling native full-access agent runtimes. Configure Hermes, OpenAI Codex and Anthropic Claude Code with explicit homes, credential references and reversible receipts.
 license: MIT
 metadata:
-  version: 0.1.0
+  version: 0.1.1
   platforms: [linux, macos, wsl]
 ---
 
@@ -33,7 +33,13 @@ credential extractor. Loading the skill makes no machine changes.
    `ballz run hermes --home /absolute/runtime/home --cwd /absolute/workspace --prompt-file task.txt`.
    This starts a real agent. `--dry-run` prints the launch contract without
    resolving credentials or calling a model. `--interactive` requires a TTY.
+   Explicit Hermes roots are pinned against sticky profile selection; named
+   profile homes stay pinned without rewriting `active_profile`. Native backend
+   precedence includes legacy `env_type`; stored messaging cwd is superseded
+   by the selected local CLI working directory.
 7. Roll back: `ballz rollback RECEIPT_ID`. With a custom `--state-dir`, repeat it.
+   Interrupted rollback can be retried with the same receipt; already-restored
+   original bytes/absence are acknowledged without rewriting the target.
    Drift is an error, not permission to overwrite someone else's later edits.
 
 Use `codex`/`openai` for OpenAI Codex and `claude`/`anthropic` for Claude Code.

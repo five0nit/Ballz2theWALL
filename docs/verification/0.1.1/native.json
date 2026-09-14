@@ -1,0 +1,50 @@
+{
+  "hermes": {
+    "adapter": "hermes",
+    "executable": "/home/fiv30nit/.local/bin/hermes",
+    "version": "0.21.1",
+    "tested_version": "0.21.1",
+    "native_flag": "--yolo",
+    "flag_supported": true,
+    "status": "ready",
+    "auth": "not_probed",
+    "version_match": true,
+    "effective_native_config": {
+      "mode": "off",
+      "cron": "approve",
+      "single": "approve",
+      "unattended": "approve",
+      "terminal": "local",
+      "private_urls": true
+    },
+    "isolated_apply_rollback": "passed"
+  },
+  "codex": {
+    "adapter": "codex",
+    "executable": "/home/fiv30nit/.npm-global/bin/codex",
+    "version": "0.152.0",
+    "tested_version": "0.152.0",
+    "native_flag": "--dangerously-bypass-approvals-and-sandbox",
+    "flag_supported": true,
+    "status": "ready",
+    "auth": "not_probed",
+    "version_match": true,
+    "native_parser": "accepted generated config; rejected invalid-policy control",
+    "isolated_apply_rollback": "passed"
+  },
+  "claude": {
+    "adapter": "claude",
+    "executable": "/home/fiv30nit/.npm-global/bin/claude",
+    "version": "2.1.201",
+    "tested_version": "2.1.201",
+    "native_flag": "--dangerously-skip-permissions",
+    "flag_supported": true,
+    "status": "ready",
+    "auth": "not_probed",
+    "version_match": true,
+    "native_parser": "not_verified; CLI help is not a settings-schema check",
+    "isolated_apply_rollback": "passed"
+  },
+  "model_execution": "not_tested",
+  "browser_authentication": "not_tested"
+}

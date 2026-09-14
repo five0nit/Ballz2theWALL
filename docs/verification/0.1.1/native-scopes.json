@@ -1,0 +1,137 @@
+{
+  "scope_cases": [
+    {
+      "case": "custom_root",
+      "matched": true
+    },
+    {
+      "case": "custom_root_unfixed_control",
+      "matched": true
+    },
+    {
+      "case": "default_root",
+      "matched": true
+    },
+    {
+      "case": "default_root_unfixed_control",
+      "matched": true
+    },
+    {
+      "case": "nested_root",
+      "matched": true
+    },
+    {
+      "case": "nested_root_unfixed_control",
+      "matched": true
+    },
+    {
+      "case": "custom_named",
+      "matched": true
+    },
+    {
+      "case": "default_named",
+      "matched": true
+    }
+  ],
+  "terminal_cases": [
+    {
+      "config": {},
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "env_type": "docker"
+      },
+      "native_backend": "docker",
+      "ballz_exit": 2,
+      "matched": true
+    },
+    {
+      "config": {
+        "env_type": "ssh"
+      },
+      "native_backend": "ssh",
+      "ballz_exit": 2,
+      "matched": true
+    },
+    {
+      "config": {
+        "backend": "local",
+        "env_type": "docker"
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "backend": "docker",
+        "env_type": "local"
+      },
+      "native_backend": "docker",
+      "ballz_exit": 2,
+      "matched": true
+    },
+    {
+      "config": {
+        "backend": "local",
+        "cwd": "/other/project"
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "env_type": "local",
+        "cwd": "child"
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "cwd": null
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "cwd": 1
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "cwd": true
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    },
+    {
+      "config": {
+        "cwd": []
+      },
+      "native_backend": "local",
+      "ballz_exit": 0,
+      "matched": true
+    }
+  ],
+  "execution": "isolated installed-native function slices; no CLI startup",
+  "native_source_sha256": {
+    "hermes_cli/main.py": "5a152b66eae942b6ce080fdea2da806efa2bcccfda23270a8adb02fef52cdb44",
+    "hermes_cli/_parser.py": "8f6573f8bc211208ae884e9ca21987240abd28bc3312c7189f323286dfc29a21",
+    "hermes_cli/profiles.py": "b2e4810a35154815ab99840cb269fce17d83b6fa3bb01fe11f7edde0a8bd5fc8",
+    "hermes_constants.py": "475a162ae8877da38d60e8c04952986487200c0fdec6b137a5f917d295d5f30d",
+    "cli.py": "ded7d07a2cb3f778d0219ae530754f3cb48373ca17cfe76545ac1e3b711aa27a"
+  },
+  "model_execution": "not_tested"
+}

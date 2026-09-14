@@ -8,7 +8,10 @@ Registry aliases resolve to the same adapter object; no duplicate provider logic
 ## Verified contract targets
 
 - Hermes Agent 0.21.1: `HERMES_HOME/config.yaml`, `hermes chat --yolo`;
-  one-shot input through `--oneshot --query-file -`.
+  one-shot input through `--oneshot --query-file -`. For explicit root homes,
+  launch/help/version commands add `--profile default` so sticky profile selection
+  cannot redirect the home. Named homes with immediate parent `profiles` already
+  use the native pinning path and must not receive that root-selection flag.
 - Codex CLI 0.152.0: `CODEX_HOME/config.toml`,
   `codex exec --dangerously-bypass-approvals-and-sandbox -`;
   native stdin prompt, environment-policy overrides through `-c`.
@@ -33,8 +36,11 @@ Use a process-local launch or explicitly migrate that config separately.
 `run` and `apply` differ deliberately: apply selects stored settings for future
 processes; run uses native process-local flags and leaves those settings alone.
 Hermes config can override TERMINAL_ENV, so a stored nonlocal backend must be
-changed explicitly before a local full-access launch. Private URL allowances are
-persisted by apply, not universally enforced by launch flags.
+changed explicitly before a local full-access launch. Validation follows native
+`terminal.backend` precedence over legacy `terminal.env_type`. Stored messaging
+`terminal.cwd` is superseded by the native local CLI process working directory;
+Ballz pins both subprocess cwd and `TERMINAL_CWD` to explicit `--cwd`.
+Private URL allowances are persisted by apply, not universally enforced by launch flags.
 
 ## Add an adapter
 

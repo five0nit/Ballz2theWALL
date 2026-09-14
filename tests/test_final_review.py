@@ -15,22 +15,22 @@ def test_hermes_inherited_terminal_cwd_is_pinned(tmp_path, monkeypatch, capsys):
     assert result["environment_overrides"]["TERMINAL_CWD"] == str(tmp_path)
 
 
-def test_hermes_relative_config_cwd_resolves_in_child(tmp_path, monkeypatch, capsys):
+def test_hermes_relative_config_cwd_is_overridden_by_local_cli(tmp_path, monkeypatch, capsys):
     monkeypatch.chdir(tmp_path)
     workspace = tmp_path / "child"
     workspace.mkdir()
     (tmp_path / "config.yaml").write_text("terminal:\n  cwd: child\n")
     assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(workspace),
-                     "--prompt", "x", "--dry-run"]) == 2
-    assert json.loads(capsys.readouterr().out)["status"] == "error"
+                     "--prompt", "x", "--dry-run"]) == 0
+    assert json.loads(capsys.readouterr().out)["environment_overrides"]["TERMINAL_CWD"] == str(workspace)
 
 
 @pytest.mark.parametrize("value", ["null", "1", "true", "[]"])
-def test_hermes_non_string_cwd_rejected(tmp_path, capsys, value):
+def test_hermes_unused_stored_cwd_does_not_block_local_cli(tmp_path, capsys, value):
     (tmp_path / "config.yaml").write_text(f"terminal:\n  cwd: {value}\n")
     assert cli.main(["run", "hermes", "--home", str(tmp_path), "--cwd", str(tmp_path),
-                     "--prompt", "x", "--dry-run"]) == 2
-    assert json.loads(capsys.readouterr().out)["status"] == "error"
+                     "--prompt", "x", "--dry-run"]) == 0
+    assert json.loads(capsys.readouterr().out)["environment_overrides"]["TERMINAL_CWD"] == str(tmp_path)
 
 
 @pytest.mark.parametrize("record", [[], None, {"schema": 1, "id": "a" * 32, "status": []},

@@ -1,0 +1,49 @@
+{
+  "version": "0.1.1",
+  "verified_at": "2026-09-14T23:51:49.554119+00:00",
+  "source_suite": {
+    "tests": 403,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 403,
+    "late_review_cases": 27
+  },
+  "installed_suite": {
+    "tests": 403,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 403,
+    "late_review_cases": 27
+  },
+  "native_scope_count": 8,
+  "native_terminal_count": 11,
+  "native_source_sha256": {
+    "hermes_cli/main.py": "5a152b66eae942b6ce080fdea2da806efa2bcccfda23270a8adb02fef52cdb44",
+    "hermes_cli/_parser.py": "8f6573f8bc211208ae884e9ca21987240abd28bc3312c7189f323286dfc29a21",
+    "hermes_cli/profiles.py": "b2e4810a35154815ab99840cb269fce17d83b6fa3bb01fe11f7edde0a8bd5fc8",
+    "hermes_constants.py": "475a162ae8877da38d60e8c04952986487200c0fdec6b137a5f917d295d5f30d",
+    "cli.py": "ded7d07a2cb3f778d0219ae530754f3cb48373ca17cfe76545ac1e3b711aa27a"
+  },
+  "source_python": "3.13.14",
+  "wheel_python": "3.11.15",
+  "wheel_import": "site-packages",
+  "native_model_execution": false,
+  "browser_authentication": false,
+  "live_activation": false,
+  "publication": false,
+  "discovery_exception": "Narrow canonical-repository correctness patch; no new dependencies; original docs/discovery/DECISION.md retained",
+  "payload_sha256": {
+    "src/ballz2thewall/__init__.py": "259855c8eaf70dc14ba692e5962234e73dd57c4005d05e10e730f46c1cc52de4",
+    "src/ballz2thewall/__main__.py": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+    "src/ballz2thewall/adapters.py": "b005f11d5d2660a34e34f1735bbcc20a0144efff398a7c315227a907eef2b7db",
+    "src/ballz2thewall/browser.py": "be998b809b9a12ef5675e78973b14277ac74046100d8d594ba8d0d33c607b2ec",
+    "src/ballz2thewall/cli.py": "836d6c126dd5fb5d5366feb577ffa350ae8f01c84f0f1e9609f77072e98b34c8",
+    "src/ballz2thewall/config.py": "a8223ebdecb1ba499c96f008e9818eb9b43f614a2a9779a8e5aea94cda40c905",
+    "src/ballz2thewall/credentials.py": "1e71c2ba3a4df21035dd927bb94c51e7d54c41b7e5bdc4e78649bed3d9f8e9c3",
+    "src/ballz2thewall/doctor.py": "2690c002494f24fcb09a1e64d71a9b1e9206cdd2b0c2f8c80c0611f3a000f3a7",
+    "src/ballz2thewall/skill/SKILL.md": "c46ff19a0598352e2bba8a0c87dc86dfde172fdedeb79003a3defb8b55b4f131",
+    "src/ballz2thewall/store.py": "5469f8143895a0d066e23084527ea8c84b4492a40d65cbcbd6e983d93537ab69"
+  }
+}

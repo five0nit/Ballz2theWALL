@@ -70,7 +70,7 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     if any(binding.split("=", 1)[0] in reserved for binding in args.secret):
         raise ValueError("Credential bindings cannot replace runtime scope or executable resolution variables")
     argv = adapter.argv(interactive=args.interactive, model=args.model, chrome=args.chrome,
-                        inherit_secrets=args.inherit_secrets)
+                        inherit_secrets=args.inherit_secrets, home=home)
     env_updates = adapter.environment(home, cdp)
     cwd = args.cwd.expanduser().absolute()
     if not cwd.is_dir():
@@ -83,17 +83,11 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     if adapter.name == "hermes" and target.exists():
         native = parse(target.read_bytes(), adapter.filename)
         terminal = native.get("terminal", {})
-        if not isinstance(terminal, dict) or terminal.get("backend", "local") != "local":
+        if (not isinstance(terminal, dict)
+                or terminal.get("backend", terminal.get("env_type", "local")) != "local"):
             raise ValueError("Hermes home selects a nonlocal terminal; use ballz apply for the local profile first")
-        native_cwd = terminal.get("cwd", ".")
-        if not isinstance(native_cwd, str) or not native_cwd.strip():
-            raise ValueError("Hermes terminal.cwd must be a nonempty string")
-        if native_cwd.strip() not in (".", "auto", "cwd"):
-            configured_cwd = Path(native_cwd).expanduser()
-            if not configured_cwd.is_absolute():
-                configured_cwd = cwd / configured_cwd
-            if configured_cwd.resolve() != cwd.resolve():
-                raise ValueError("Hermes terminal.cwd conflicts with --cwd; update the native config explicitly")
+        # Native local CLI replaces stored terminal.cwd with os.getcwd(). The
+        # subprocess cwd and pinned TERMINAL_CWD above are the effective scope.
     if args.dry_run:
         output({"status": "dry_run", "adapter": adapter.name, "argv": argv, "cwd": str(cwd),
                 "environment_overrides": env_updates, "credentials": descriptors,

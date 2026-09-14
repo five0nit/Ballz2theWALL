@@ -1,70 +1,55 @@
-# Verification — 0.1.0 local alpha
+# Verification — 0.1.1 local alpha
 
-Verified on Linux/WSL on 2026-09-15. No live agent profile, gateway, authentication store or default browser profile was modified. No remote repository, registry publication or machine-wide installation was performed.
+Local patch release following the late independent read-only code review. No live runtime profiles, credentials, gateways or browser sessions changed. No remote publication or global installation.
 
 ## Passing gates
 
-- Source suite: **376 passed**, Python **3.13.14**; no failures, errors or skips.
-- Fresh non-editable wheel suite: **376 passed**, Python **3.11.15**; no failures, errors or skips. Executed from `/tmp` with `PYTHONPATH` removed and pytest's source `pythonpath` setting disabled.
-- Ruff: `All checks passed!` for `src`, `tests`, and `scripts`.
-- Wheel and source distribution build: passed with isolated Hatchling build environments.
-- Installed `ballz` and `ballz2thewall` console scripts: version checks passed.
-- Installed-package local round-trips: Hermes, Codex and Claude config apply, idempotent plan, dry-run launch, rollback; bundled skill install and rollback.
-- Native Hermes **0.21.1**: isolated-home native config readers confirmed approval mode `off`; cron, unattended and single-query modes `approve`; terminal backend `local`; private URL access enabled.
-- Native Codex **0.152.0**: `features list` accepted generated config and rejected an invalid-policy negative control, proving that the selected config was actually loaded.
-- Claude Code **2.1.201**: installed help advertises the native permission flag. Generated settings passed the SchemaStore Claude settings schema; an invalid permission-mode control failed. **This is not proof of Claude's native settings parser.**
-- Codex generated config passed the official OpenAI JSON Schema; invalid-policy control failed.
-- Real isolated Chrome **147.0.7727.55**: version endpoint returned protocol **1.3**. Only `/json/version` metadata was requested. Temporary process group and empty profile were removed. An earlier teardown raced Chrome's profile writes; the process-group-managed repeat passed including cleanup.
+- Source: **403 passed**, Python 3.13.14; zero failures, errors or skips.
+- Fresh non-editable wheel: **403 passed**, Python 3.11.15; zero failures, errors or skips. Tests ran from `/tmp` with `PYTHONPATH` removed, pytest source injection disabled, and imports confirmed in `site-packages`.
+- New late-review regression cases: **27**. Fault injection covers before/after rollback intent, restoration and completion, existing and newly created targets, restart recovery, legacy receipts and unrelated drift.
+- Ruff: `All checks passed!` for `src`, `tests`, `scripts`. New test/probe files also passed format checking.
+- Installed `ballz` and `ballz2thewall`: version checks, all adapter apply/idempotent-plan/dry-run/rollback round-trips and bundled skill install/rollback passed.
+- Actual installed Hermes profile and terminal functions: **8 scope cases**, including unfixed negative controls, and **11 terminal cases** passed from both source and installed wheel. Helpers were extracted from native source via AST; resolver imports were real, not mocked. All homes were temporary. This was not full agent startup.
+- Native Hermes 0.21.1 config/approval readers passed; Codex 0.152.0 accepted generated config and rejected an invalid-policy control. Claude Code 2.1.201 advertised its native permission flag. All isolated config rollbacks passed.
 
-Machine-readable gate evidence is in `verification/gates.json`. Release artifact hashes are recorded separately in `dist/RELEASE.json` after final packaging, avoiding self-referential archive hashes.
+Machine evidence: [`verification/0.1.1/gates.json`](verification/0.1.1/gates.json), JUnit files, native source hashes and wheel-run output in that directory. `dist/RELEASE.json` binds final artifact hashes and commit after packaging.
 
-## Final-review corrections
+## Review dispositions
 
-Regression tests first reproduced defects; production fixes then passed the full suites:
+1. **Sticky Hermes home redirection — fixed in 0.1.1.** Non-profile-shaped homes pass `--profile default`; named profile-shaped homes retain native early-return pinning. Launch and help/version probes use the same rule. Default, custom, nested and named homes tested; no marker edits.
+2. **YAML alias mutation — already fixed in 0.1.0**, preserved and retested.
+3. **Legacy terminal backend validation — fixed in 0.1.1.** `terminal.backend` wins over legacy `terminal.env_type`, matching native behavior.
+4. **Valid CLI cwd rejection — fixed in 0.1.1.** The native local CLI replaces stored messaging cwd with process cwd. The earlier contradictory test and documentation were corrected; child `TERMINAL_CWD` remains pinned.
+5. **Nonstandard JSON constants — already fixed in 0.1.0**, preserved and retested.
+6. **Malformed receipt exceptions — already fixed in 0.1.0**, preserved and retested.
+7. **Interrupted rollback acknowledgement — fixed in 0.1.1.** Persist `rolling_back` before restoration, recover either side of the write, and acknowledge exact original bytes/absence without rewriting. Legacy interrupted receipts supported; unrelated drift still rejected.
+8. **Boolean/integer equality — already fixed in 0.1.0**, preserved and retested.
 
-1. Pin Hermes `TERMINAL_CWD` to the selected child working directory; reject conflicting native paths and invalid value types. Evaluate relative native paths from the child's directory, not the controller's parent directory.
-2. Validate rollback receipt mappings, required fields, path shape, statuses, hash syntax and mode types before file operations. Malformed records produce controlled CLI errors rather than uncaught tracebacks.
-3. Reject nonstandard JSON constants and avoid emitting nonstandard JSON during config updates.
-
-Earlier regressions also cover YAML alias detachment and boolean-versus-integer settings equality. Saved delegated work was recovered and directly tested. A timed-out worker is not counted as an independent review approval.
-
-## Evidence boundaries
-
-- Real model execution: **not tested**. Subprocess transport tests use clearly identified local fixtures; they prove stdin/environment/exit-code behavior, not model authentication or provider access.
-- Credential bindings: real environment lookup and local child-process transport tested; 1Password and keyring success/error paths tested with fixtures. No live password-manager account was unlocked or read.
-- Authenticated Chrome browsing, Claude extension pairing, Codex browser MCP: **not tested**. Browser metadata does not prove a site login or runtime attachment.
-- Claude native settings parsing: **not verified**. SchemaStore validation and CLI help are separate evidence.
-- Native Windows write/rollback: **not implemented**. macOS: **unverified**.
-- GitHub Actions workflow supplied, but remote CI: **not run**.
-- Provider policy, OS elevation, instruction-file guards and browser-saved-password extraction are outside this implementation.
+The read-only reviewer reported defects in the earlier snapshot, not approval of this final patch. Parent reproduced surviving failures and verified repairs directly. An initial native probe also falsified an overstrict nested-home rejection; that unnecessary guard was removed before release.
 
 ## Reproduce
-
-From the repository:
 
 ```bash
 .venv/bin/python -m pytest -q
 .venv/bin/ruff check src tests scripts
 .venv/bin/python -m build
-
-# Use a new empty environment path, not an existing editable installation.
-uv venv --python python3.11 /tmp/ballz-clean-check
-uv pip install --python /tmp/ballz-clean-check/bin/python \
-  "$PWD/dist/ballz2thewall-0.1.0-py3-none-any.whl" pytest
+uv venv --python python3.11 /tmp/ballz-clean-0.1.1
+uv pip install --python /tmp/ballz-clean-0.1.1/bin/python \
+  "$PWD/dist/ballz2thewall-0.1.1-py3-none-any.whl" pytest
 REPO="$PWD"
 cd /tmp
-env -u PYTHONPATH /tmp/ballz-clean-check/bin/python "$REPO/scripts/package_smoke.py"
-env -u PYTHONPATH /tmp/ballz-clean-check/bin/python -m pytest \
-  "$REPO/tests" -o pythonpath= -q
-```
-
-Optional installed-runtime checks, using the actual installed Hermes paths:
-
-```bash
-.venv/bin/python scripts/native_smoke.py \
+env -u PYTHONPATH /tmp/ballz-clean-0.1.1/bin/python "$REPO/scripts/package_smoke.py"
+env -u PYTHONPATH /tmp/ballz-clean-0.1.1/bin/python -m pytest "$REPO/tests" -o pythonpath= -q
+env -u PYTHONPATH /tmp/ballz-clean-0.1.1/bin/python "$REPO/scripts/native_scope_smoke.py" \
   --hermes-source /absolute/hermes-agent \
   --hermes-python /absolute/hermes-agent/venv/bin/python \
-  --output /tmp/ballz-native-smoke.json
+  --output /tmp/ballz-native-scopes.json
 ```
 
-This probe uses empty temporary runtime homes and does not invoke a model. It records Claude's native-parser gap rather than substituting help output for a passing parser check.
+## Boundaries and retained evidence
+
+- Live model execution, authenticated browser attachment and Claude native settings parsing remain unverified. Credential-manager integrations use labeled fixtures; no native auth store was read for this patch.
+- Source-level function execution, native help/config probes, installed-package round-trips and model execution are distinct gates.
+- No browser or external schema probe was rerun for this patch. Earlier evidence remains in [`VERIFICATION-0.1.0.md`](VERIFICATION-0.1.0.md); its cwd interpretation is explicitly superseded above.
+- Native Windows writes unsupported; macOS unverified; remote CI not run. Controller locking does not eliminate races with unrelated native editors.
+- Repo-first exception: narrow fixes inside the canonical MIT repository; no new dependencies or implementation base. Original discovery decision remains in `docs/discovery/DECISION.md`.

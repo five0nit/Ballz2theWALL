@@ -41,14 +41,22 @@ class Adapter:
             return result
         return {"permissions.defaultMode": "bypassPermissions", "sandbox.enabled": False}
 
+    def scope_args(self, home: Path | None) -> list[str]:
+        if self.name != "hermes" or home is None or home.parent.name == "profiles":
+            return []
+        # Native Hermes otherwise honors active_profile even with HERMES_HOME set.
+        # Explicit default resolves to the supplied non-profile-shaped root.
+        # Named profile homes are already pinned by the native early-return path.
+        return ["--profile", "default"]
+
     def argv(self, *, interactive: bool, model: str | None = None, chrome: bool = False,
-             inherit_secrets: bool = False) -> list[str]:
+             inherit_secrets: bool = False, home: Path | None = None) -> list[str]:
         if chrome and self.name != "claude":
             raise ValueError("--chrome requires the Claude Code adapter")
         if inherit_secrets and self.name != "codex":
             raise ValueError("--inherit-secrets requires the Codex adapter")
         if self.name == "hermes":
-            args = [self.executable, "chat", self.flag]
+            args = [self.executable, *self.scope_args(home), "chat", self.flag]
             if not interactive:
                 args += ["--oneshot", "--query-file", "-"]
         elif self.name == "codex":

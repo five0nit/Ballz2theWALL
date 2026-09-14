@@ -19,11 +19,13 @@ def inspect_runtime(adapter: Adapter, home: Path | None = None) -> dict:
         return result
     env = dict(os.environ)
     if home:
+        home = home.expanduser().absolute()
         env[adapter.home_env] = str(home)
+    scope = adapter.scope_args(home)
     try:
-        help_args = [exe, "chat", "--help"] if adapter.name == "hermes" else [exe, "--help"]
+        help_args = [exe, *scope, "chat", "--help"] if adapter.name == "hermes" else [exe, "--help"]
         help_run = subprocess.run(help_args, capture_output=True, text=True, timeout=30, env=env, check=False)
-        version_run = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=30, env=env, check=False)
+        version_run = subprocess.run([exe, *scope, "--version"], capture_output=True, text=True, timeout=30, env=env, check=False)
         match = re.search(r"(?<![\w.])v?(\d+\.\d+\.\d+)\b", version_run.stdout)
         result["version"] = match.group(1) if match else None
         result["flag_supported"] = help_run.returncode == 0 and adapter.flag in help_run.stdout
