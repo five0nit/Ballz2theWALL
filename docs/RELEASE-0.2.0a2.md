@@ -19,9 +19,9 @@ Hermes, OpenAI Codex and Claude Code support retained.
 
 ## Verification
 
-535 source tests and 535 fresh-wheel tests passed (3 platform/opt-in skips each).
-77 OpenClaw tests; 10 native OpenClaw 2026.6.1 smoke checks; 11 native Windows installer
-checks; 35 native Windows installed-wheel core/store tests (1 POSIX-only skip).
+537 source tests and 537 fresh-wheel tests passed (4 platform/opt-in skips each).
+77 OpenClaw tests; 10 native OpenClaw 2026.6.1 smoke checks; 13 native Windows installer
+checks; 48 native Windows installed-wheel core/store/installer tests (2 platform/opt-in skips).
 Independent spec and code-quality reviews passed. Full evidence in docs/VERIFICATION.md.
 
 ## Scope

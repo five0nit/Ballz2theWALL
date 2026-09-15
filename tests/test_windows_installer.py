@@ -30,6 +30,8 @@ def ps_quote(text: str) -> str:
 
 
 def native_path(path: Path) -> str:
+    if not POWERSHELL or (os.name != "nt" and not shutil.which("wslpath")):
+        pytest.skip("Native Windows PowerShell/WSL path translation is unavailable")
     if os.name == "nt":
         return str(path)
     return subprocess.check_output(["wslpath", "-w", str(path)], text=True).strip()
@@ -103,6 +105,12 @@ def test_bootstrap_integrity_and_scope_contract():
     assert script.index("requires Windows 10 or newer") < script.index("New-Item -ItemType Directory")
     assert "Invoke-Checked $python @('-I', '-m', 'ballz2thewall', '--version')" in script
     assert "Start-Process -FilePath $python -ArgumentList '-I -m ballz2thewall setup --gui'" in script
+
+
+def test_missing_windows_toolchain_skips_before_path_conversion(monkeypatch):
+    monkeypatch.setitem(globals(), "POWERSHELL", None)
+    with pytest.raises(pytest.skip.Exception):
+        native_path(INSTALLER)
 
 
 def test_native_powershell_parser():
@@ -203,6 +211,23 @@ def test_native_shortcut_in_scratch_only(windows_scratch):
         "target": native_path(target), "arguments": "-I -m ballz2thewall setup --gui",
         "cwd": native_path(windows_scratch),
     }
+
+
+def test_native_builtin_modules_survive_inherited_module_path(windows_scratch):
+    bundle = make_bundle(windows_scratch)
+    payload = bundle / "payload"
+    payload.mkdir()
+    name = "ballz2thewall-0.2.0a2-py3-none-any.whl"
+    (payload / name).write_bytes(b"fixture")
+    (payload / "SHA256SUMS.json").write_text(json.dumps({name: "0" * 64}))
+    result = powershell(
+        "$env:PSModulePath='C:\\missing-ballz-test-modules'; "
+        f"& {ps_quote(native_path(bundle / 'windows/install.ps1'))} "
+        f"-InstallRoot {ps_quote(native_path(windows_scratch / 'private'))} "
+        "-NonInteractive -NoLaunch -NoShortcut; exit $LASTEXITCODE")
+    assert result.returncode == 1
+    assert "Wheel SHA-256 mismatch" in result.stderr
+    assert "not recognized" not in result.stderr
 
 
 @pytest.mark.skipif(os.getenv("B2W_WINDOWS_INSTALL_SMOKE") != "1", reason="Opt-in network/private-runtime smoke")

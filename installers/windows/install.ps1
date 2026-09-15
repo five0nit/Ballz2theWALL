@@ -17,7 +17,7 @@ $lock = $null
 $downloadClient = $null
 $exitCode = 0
 # Save and restore process-local settings even when invoked from an existing shell.
-$environmentNames = @('UV_PYTHON_INSTALL_DIR', 'UV_CACHE_DIR', 'UV_PYTHON_DOWNLOADS', 'UV_PYTHON_PREFERENCE')
+$environmentNames = @('UV_PYTHON_INSTALL_DIR', 'UV_CACHE_DIR', 'UV_PYTHON_DOWNLOADS', 'UV_PYTHON_PREFERENCE', 'PSModulePath')
 $savedEnvironment = @{}
 foreach ($name in $environmentNames) { $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
 $originalTls = [Net.ServicePointManager]::SecurityProtocol
@@ -86,6 +86,8 @@ function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
 }
 
 try {
+    # PowerShell 7 callers can omit Windows PowerShell's built-in modules.
+    $env:PSModulePath = [IO.Path]::Combine($PSHOME, 'Modules') + ';' + $env:PSModulePath
     if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or [Environment]::OSVersion.Version.Major -lt 10) {
         throw 'Ballz2theWALL setup requires Windows 10 or newer. No installation was attempted.'
     }

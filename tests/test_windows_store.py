@@ -73,6 +73,22 @@ def test_windows_acl_and_reparse_security(tmp_path):
 
 
 @native_windows
+def test_windows_lock_creation_uses_explicit_owner(tmp_path, monkeypatch):
+    original = platform_store.kernel.CreateFileW
+    calls = []
+
+    def create(*args):
+        calls.append(bool(args[3]))
+        return original(*args)
+
+    monkeypatch.setattr(platform_store.kernel, "CreateFileW", create)
+    root = tmp_path / "private"
+    with Store(root).lock():
+        platform_store._validate_private_acl(root / "lock", directory=False)
+    assert calls and all(calls)
+
+
+@native_windows
 def test_windows_atomic_write_does_not_use_posix_calls(tmp_path, monkeypatch):
     def forbidden(*args, **kwargs):
         raise AssertionError("POSIX-only primitive used on Windows")

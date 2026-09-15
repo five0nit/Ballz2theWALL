@@ -6,8 +6,8 @@ Previous evidence remains under [0.2.0a1](VERIFICATION-0.2.0a1.md) and
 
 ## Passing release gates
 
-- Source: **535 passed, 3 skipped**. Ruff and whitespace checks passed.
-- Fresh, non-editable Python 3.11 wheel: **535 passed, 3 skipped**. Both installed
+- Source: **537 passed, 4 skipped**. Ruff and whitespace checks passed.
+- Fresh, non-editable Python 3.11 wheel: **537 passed, 4 skipped**. Both installed
   console entrypoints, four adapters' scratch round trips, and bundled skill
   install/rollback exercised outside source imports.
 - OpenClaw targeted tests: **77 passed**. Independent spec review PASS and
@@ -16,10 +16,10 @@ Previous evidence remains under [0.2.0a1](VERIFICATION-0.2.0a1.md) and
   native config validation, two effective policy scopes, ON/OFF idempotence,
   byte-identical restoration, restrictive-policy/schema negative controls,
   unsupported profile rejection and ambient-home override pinning.
-- Native Windows x64 installer: **11 passed**, including private Python bootstrap,
+- Native Windows x64 installer: **13 passed**, including private Python bootstrap,
   wheel install, reinstall, source fallback, no global PATH or Start Menu changes,
   PowerShell parsing, invalid-payload controls and COM shortcut readback.
-- Native Windows installed-wheel core/store: **35 passed, 1 skipped**. Eight native
+- Native Windows installed-wheel core/store/installer: **48 passed, 2 skipped**. Eight native
   store smoke groups pass; Windows ACLs are checked as ACLs, not POSIX bits.
 - Info page: four browser cases at 1440, 390 and 320 CSS pixels; keyboard/touch preview
   switch, FAQ disclosure, download anchor, reduced motion and no-JavaScript fallback.
@@ -28,7 +28,8 @@ Previous evidence remains under [0.2.0a1](VERIFICATION-0.2.0a1.md) and
 
 Source/fresh-wheel skips are the opt-in network installation test and native-only
 Windows tests. Installation and Windows cases are exercised separately.
-The one native-Windows skip is the POSIX-only permission-mode test.
+The two native-Windows skips are the POSIX permission-mode test and the separately
+executed opt-in installation test.
 
 ## Audit corrections
 
@@ -42,6 +43,12 @@ The one native-Windows skip is the POSIX-only permission-mode test.
 - Historical secret scan: three false positives individually examined: two source-file
   SHA-256 metadata entries and one printed CLI credential-reference syntax. Exact
   historical fingerprints alone are allowlisted in `.gitleaksignore`; no path-wide exemptions.
+
+GitHub clean-runner failures additionally exposed a Windows-toolchain skip-order
+bug, default Administrators ownership on elevated lock-file creation, and a
+PowerShell 7 module-path inheritance conflict. Fixed with early toolchain checks,
+explicit current-user lock descriptors and a temporary built-in module path.
+Regression tests preserve full native coverage; no failing Windows job was removed.
 
 ## Explicitly outside acceptance
 

@@ -137,9 +137,10 @@ if WINDOWS:
     def validate_private_directory(path: Path) -> None:
         _validate_private_acl(path, directory=True)
 
+    class SecurityAttributes(ctypes.Structure):
+        _fields_ = [("length", w.DWORD), ("descriptor", P), ("inherit", w.BOOL)]
+
     def _create_private_directory(path: Path) -> None:
-        class SecurityAttributes(ctypes.Structure):
-            _fields_ = [("length", w.DWORD), ("descriptor", P), ("inherit", w.BOOL)]
         with _private_descriptor() as descriptor:
             attributes = SecurityAttributes(ctypes.sizeof(SecurityAttributes), descriptor, False)
             if not kernel.CreateDirectoryW(str(path), ctypes.byref(attributes)):
@@ -206,7 +207,12 @@ def advisory_lock(path: Path):
         import msvcrt
         # No FILE_SHARE_DELETE: another cooperating process cannot replace the
         # lock inode while it is open. OPEN_REPARSE_POINT never follows a link.
-        handle = kernel.CreateFileW(str(path), 0xC0000000, 3, None, 4, 0x00200000, None)
+        # Elevated tokens may default new objects to Administrators ownership.
+        # Supply the same explicit current-user owner/DACL used for state roots.
+        with _private_descriptor() as descriptor:
+            attributes = SecurityAttributes(ctypes.sizeof(SecurityAttributes), descriptor, False)
+            handle = kernel.CreateFileW(str(path), 0xC0000000, 3, ctypes.byref(attributes),
+                                        4, 0x00200000, None)
         if handle == w.HANDLE(-1).value:
             raise ctypes.WinError(ctypes.get_last_error())
         try:

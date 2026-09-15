@@ -2,32 +2,25 @@
   "version": "0.2.0a2",
   "scope": "unsigned alpha; no authenticated model/desktop/macOS hardware acceptance",
   "source": {
-    "tests": 538,
+    "tests": 541,
     "failures": 0,
     "errors": 0,
-    "skipped": 3,
-    "passed": 535
+    "skipped": 4,
+    "passed": 537
   },
   "fresh_wheel": {
-    "tests": 538,
+    "tests": 541,
     "failures": 0,
     "errors": 0,
-    "skipped": 3,
-    "passed": 535
+    "skipped": 4,
+    "passed": 537
   },
   "windows_install_reinstall_source_fallback": {
-    "tests": 11,
+    "tests": 13,
     "failures": 0,
     "errors": 0,
     "skipped": 0,
-    "passed": 11
-  },
-  "windows_installed_wheel_core_store": {
-    "tests": 36,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 1,
-    "passed": 35
+    "passed": 13
   },
   "openclaw_native": {
     "runtime": "2026.6.1",
@@ -109,19 +102,31 @@
     "status": "passed",
     "scope": "native COM; scratch Programs override",
     "arguments": "-I -m ballz2thewall setup --gui",
-    "installer_sha256": "6d75d83fce113559ffabe639e120f8b6977e9fdf1806069a8c7c9137eacd0044"
+    "installer_sha256": "15e99ae9b8ac5279549594b86bcc93ae9eaaf17bd5534b9dbf3586d383068bfb"
   },
   "reviews": {
     "spec": "PASS; explicit per-agent runtime overrides rejected",
     "quality": "APPROVED; independent 77-test run"
   },
   "secret_scan_history": "3 commits scanned; zero findings after three reviewed historical false-positive fingerprints",
-  "wheel_sha256": "4a23664b7b5be26ff52c32c3a5f74496bcd31ba5daed87c8849fdf1723a1c830",
+  "wheel_sha256": "d098b91d2f5649edb2eb1799c36c1b728ffdf99ee43d3aec29eb760d55360f00",
   "unverified": [
     "Real Mac installation/TCC attribution",
     "Windows ARM64",
     "Authenticated model execution",
     "Universal desktop companion",
     "Code signing/notarization"
+  ],
+  "windows_installed_wheel_core_store_installer": {
+    "tests": 50,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "passed": 48
+  },
+  "ci_corrections": [
+    "Native Windows tests check availability before path conversion",
+    "New Windows lock uses explicit owner descriptor, including elevated tokens",
+    "Installer prepends native built-in module path and restores it"
   ]
 }
