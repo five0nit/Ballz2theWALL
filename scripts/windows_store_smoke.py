@@ -96,6 +96,9 @@ def main():
     # New state receives a protected owner-only ACL; broad parent is unchanged.
     insecure = scratch / "insecure-state"
     insecure.mkdir()
+    # Isolate the ACL rejection from elevated tokens' default Administrators owner.
+    subprocess.run(["icacls.exe", str(insecure), "/setowner", "*" + platform_store.current_user_sid()],
+                   check=True, capture_output=True)
     expect_rejected(lambda: platform_store.prepare_state_directory(insecure), "ACL")
     broad = scratch / "broad-state"
     platform_store.prepare_state_directory(broad)
@@ -108,6 +111,7 @@ def main():
     platform_store.prepare_state_directory(exposed)
     backup = exposed / "synthetic.before"
     backup.write_bytes(b"synthetic only")
+    platform_store.private_file(backup)  # Establish correct owner before widening its ACL.
     subprocess.run(["icacls.exe", str(backup), "/grant", "*S-1-1-0:(R)"],
                    check=True, capture_output=True)
     def enter_exposed_store():
