@@ -1,0 +1,35 @@
+{
+  "python": "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\venv\\Scripts\\python.exe",
+  "platform": "win32",
+  "installed_module": "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\venv\\Lib\\site-packages\\ballz2thewall\\__init__.py",
+  "installed_version": {
+    "returncode": 0,
+    "stdout": "Ballz2theWALL 0.2.0a1\n",
+    "stderr": ""
+  },
+  "store_smoke": {
+    "returncode": 0,
+    "stdout": "{\n  \"status\": \"passed\",\n  \"platform\": \"win32\",\n  \"python\": \"3.11.16 (main, Aug 14 2026, 15:34:35) [MSC v.1944 64 bit (AMD64)]\",\n  \"executable\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\Temp\\\\ballz-guided-qa-twgecrew\\\\clean install\\\\runtime\\\\venv\\\\Scripts\\\\python.exe\",\n  \"scratch\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\Temp\\\\ballz-guided-qa-twgecrew\\\\ballz-store-smoke-0hz8aan8\",\n  \"checks\": [\n    \"apply/unchanged/rollback/restart/idempotence/exact-bytes/absence\",\n    \"drift-refused-without-overwrite\",\n    \"corrupt-backup-refused\",\n    \"cross-process-mutual-exclusion-and-release\",\n    \"inherited-and-everyone-acls-refused\",\n    \"explicit-permissive-child-acl-refused\",\n    \"junction-root-parent-and-target-refused\",\n    \"hard-linked-file-refused\"\n  ],\n  \"state_acl\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\Temp\\\\ballz-guided-qa-twgecrew\\\\ballz-store-smoke-0hz8aan8\\\\private-state MIKENET\\\\coste:(OI)(CI)(F)\\n\\nSuccessfully processed 1 files; Failed processing 0 files\\n\",\n  \"durability\": \"file fsync + same-volume MoveFileExW WRITE_THROUGH; no directory fsync\",\n  \"receipt\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\Temp\\\\ballz-guided-qa-twgecrew\\\\ballz-store-smoke-0hz8aan8\\\\windows-store-receipt.json\"\n}\n",
+    "stderr": ""
+  },
+  "readonly_setup_check": {
+    "returncode": 0,
+    "stdout": "{\n  \"agents\": [\n    {\n      \"adapter\": \"hermes\",\n      \"home\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\hermes\",\n      \"label\": \"Hermes \\u2014 default\",\n      \"executable\": \"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\hermes\\\\hermes-agent\\\\venv\\\\Scripts\\\\hermes.EXE\",\n      \"version\": \"0.20.5\",\n      \"tested_version\": \"0.21.1\",\n      \"native_flag\": \"--yolo\",\n      \"flag_supported\": true,\n      \"status\": \"ready\",\n      \"auth\": \"not_probed\",\n      \"version_match\": false\n    }\n  ],\n  \"permissions\": {\n    \"platform\": \"Windows\",\n    \"session_id\": 1,\n    \"interactive_session\": true,\n    \"administrator\": false,\n    \"desktop_permissions\": \"user_session; no blanket macOS-style permission popup\",\n    \"elevation\": \"UAC for separately requested administrative launches\"\n  },\n  \"activation\": {\n    \"schema\": 1,\n    \"phase\": \"off\"\n  },\n  \"authentication\": \"not_read_or_tested\",\n  \"scope\": \"native terminal launches; existing background agents unchanged\"\n}\n",
+    "stderr": ""
+  },
+  "native_dialog_render": {
+    "returncode": 0,
+    "stdout": "{\"rendered\":\"C:\\\\Users\\\\coste\\\\AppData\\\\Local\\\\Temp\\\\ballz-guided-qa-twgecrew\\\\windows-ready.png\",\"native_buttons\":[\"Turn ON\",\"Finish (OFF)\"]}\n",
+    "stderr": ""
+  },
+  "test_dependencies": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.11.16 environment at: C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\venv\nChecked 1 package in 55ms\n"
+  },
+  "native_pytest": {
+    "returncode": 0,
+    "stdout": "......................s..s..                                             [100%]\n26 passed, 2 skipped in 2.46s\n",
+    "stderr": ""
+  }
+}

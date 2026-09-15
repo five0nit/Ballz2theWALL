@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 
+from . import platform_store
 from .config import Plan, checked_path, parse
 
 
@@ -21,20 +22,26 @@ def digest(data: bytes | None) -> str | None:
 
 def read_optional(path: Path) -> bytes | None:
     checked_path(path)
+    platform_store.validate_path(path)
     return path.read_bytes() if path.exists() else None
 
 
 def atomic_write(path: Path, data: bytes, mode: int = 0o600) -> None:
     checked_path(path)
+    platform_store.validate_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    platform_store.validate_path(path.parent)
     fd, temp = tempfile.mkstemp(prefix=".ballz-", dir=path.parent)
     try:
         with os.fdopen(fd, "wb") as stream:
-            os.fchmod(stream.fileno(), mode)
+            if platform_store.WINDOWS:
+                platform_store.private_file(type(path)(temp))
+            else:
+                os.fchmod(stream.fileno(), mode)
             stream.write(data)
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temp, path)
+        platform_store.replace_file(temp, path)
         sync_dir(path.parent)
     finally:
         if os.path.exists(temp):
@@ -42,11 +49,7 @@ def atomic_write(path: Path, data: bytes, mode: int = 0o600) -> None:
 
 
 def sync_dir(path: Path) -> None:
-    fd = os.open(path, os.O_RDONLY)
-    try:
-        os.fsync(fd)
-    finally:
-        os.close(fd)
+    platform_store.sync_dir(path)
 
 
 class Store:
@@ -55,27 +58,18 @@ class Store:
 
     @contextmanager
     def lock(self):
-        if os.name != "posix":
-            raise ValueError("Write/rollback currently require Linux, WSL or macOS (POSIX)")
-        import fcntl
         checked_path(self.root / "lock")
-        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        if self.root.stat().st_uid != os.getuid():
-            raise ValueError("State directory must belong to the current user")
-        if stat.S_IMODE(self.root.stat().st_mode) & 0o077:
-            raise ValueError("State directory must have mode 0700")
-        fd = os.open(self.root / "lock", os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
-        try:
-            fcntl.flock(fd, fcntl.LOCK_EX)
+        platform_store.prepare_state_directory(self.root)
+        with platform_store.advisory_lock(self.root / "lock"):
+            platform_store.validate_state_files(self.root)
             yield
-        finally:
-            fcntl.flock(fd, fcntl.LOCK_UN)
-            os.close(fd)
 
     def _receipt(self, receipt_id: str) -> Path:
         if not re.fullmatch(r"[0-9a-f]{32}", receipt_id):
             raise ValueError("Receipt ID must be 32 lowercase hexadecimal characters")
-        return checked_path(self.root / f"{receipt_id}.json")
+        path = checked_path(self.root / f"{receipt_id}.json")
+        platform_store.validate_path(path)
+        return path
 
     def _save(self, record: dict) -> None:
         atomic_write(self._receipt(record["id"]), (json.dumps(record, indent=2) + "\n").encode())

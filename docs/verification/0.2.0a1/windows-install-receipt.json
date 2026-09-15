@@ -1,0 +1,14 @@
+﻿{
+    "status":  "installed",
+    "application":  "Ballz2theWALL 0.2.0a1",
+    "install_root":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install",
+    "python":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\venv\\Scripts\\python.exe",
+    "uv_version":  "0.12.5",
+    "uv_archive_sha256":  "4c4d49d8738847d9b71ba319e49a5688c93eac0fe6204b1df24e98528dddf39a",
+    "package":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\final-bundle\\payload\\ballz2thewall-0.2.0a1-py3-none-any.whl",
+    "package_sha256":  "5599c08c60d0672715dd11d46da4586aca28ee77fdbd34cd164ee2c6fd413d99",
+    "shortcut":  null,
+    "profiles_changed":  false,
+    "log":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\install-20260915-012055-070.log",
+    "installed_at":  "2026-09-15T01:21:02.4962776Z"
+}

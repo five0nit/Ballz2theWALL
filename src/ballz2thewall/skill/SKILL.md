@@ -3,8 +3,8 @@ name: ballz2thewall
 description: Use when enabling native full-access agent runtimes. Configure Hermes, OpenAI Codex and Anthropic Claude Code with explicit homes, credential references and reversible receipts.
 license: MIT
 metadata:
-  version: 0.1.1
-  platforms: [linux, macos, wsl]
+  version: 0.2.0a1
+  platforms: [linux, macos, windows, wsl]
 ---
 
 # Ballz2theWALL
@@ -14,6 +14,22 @@ metadata:
 Use for operator-requested native full-access runtime setup. This skill is an
 interface to the `ballz` CLI, not an override of provider instructions or a
 credential extractor. Loading the skill makes no machine changes.
+
+## Guided setup
+
+For nontechnical users, extract the platform Setup ZIP and double-click its
+installer. It installs private Python, then launches `ballz setup --gui`.
+Use the installed shortcut to reopen setup. macOS 11+ guidance requests access
+for Terminal, which launches setup and the agent. Native Mac acceptance remains
+pending; do not label those requests runtime-verified.
+
+`ballz setup --check` checks status without requesting grants. `ballz on AGENT
+--home PATH` owns a reversible configuration transaction; `ballz off` restores
+its original settings. Close the agent first: OFF does not kill running agents
+or revoke OS grants. Do not imply universal desktop or administrative access.
+
+Installing this skill alone never runs permission setup or activates a profile.
+The user completes OS approvals and the agent's own sign-in personally.
 
 ## Operate
 

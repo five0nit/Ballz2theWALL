@@ -1,0 +1,11 @@
+Creating your Start Menu setup shortcut...
+{
+    "status":  "passed",
+    "scope":  "native COM; scratch Programs override",
+    "shortcut":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\fixture Programs\\Ballz2theWALL.lnk",
+    "target":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install\\runtime\\venv\\Scripts\\python.exe",
+    "arguments":  "-I -m ballz2thewall setup --gui",
+    "working_directory":  "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\clean install",
+    "installer_sha256":  "2be23cd82329030479d1ed414adb628f4761e3a5b1991573ba67e1eb662536d0"
+}
+

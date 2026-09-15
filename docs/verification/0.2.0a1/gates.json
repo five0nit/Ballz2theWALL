@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0a1",
+  "verified_at": "2026-09-15T01:24:11.849283+00:00",
+  "source": {
+    "tests": 453,
+    "passed": 450,
+    "skipped": 3,
+    "failed": 0,
+    "errors": 0
+  },
+  "fresh_wheel": {
+    "tests": 453,
+    "passed": 450,
+    "skipped": 3,
+    "failed": 0,
+    "errors": 0
+  },
+  "native_windows": {
+    "tests": 28,
+    "passed": 26,
+    "skipped": 2,
+    "failed": 0,
+    "errors": 0
+  },
+  "windows_store_check_groups": 8,
+  "windows_store_receipt": "C:\\Users\\coste\\AppData\\Local\\Temp\\ballz-guided-qa-twgecrew\\ballz-store-smoke-0hz8aan8\\windows-store-receipt.json",
+  "windows_installer": "passed; clean x64 install, final-wheel reinstall, exact installed-module bytes and receipt hash checked",
+  "windows_shortcut": "passed native WScript.Shell COM with Programs folder redirected to scratch; real Start Menu unchanged",
+  "windows_dialog": "offscreen actual control rendering inspected; not interactive approval testing",
+  "ruff": "passed",
+  "git_diff_check": "passed staged check with core.whitespace=blank-at-eol,space-before-tab,cr-at-eol,-blank-at-eof; raw Windows CRLF and final log blank lines retained verbatim",
+  "mac_bash_syntax": "passed",
+  "wheel_sha256": "5599c08c60d0672715dd11d46da4586aca28ee77fdbd34cd164ee2c6fd413d99",
+  "unverified": [
+    "native macOS installer execution, actual prompts and Terminal responsibility attribution",
+    "Windows ARM64",
+    "code signing and notarization",
+    "interactive user approval and live authenticated agent calls"
+  ],
+  "boundaries": [
+    "No real agent config or credentials changed",
+    "No OS permission grants made",
+    "No existing Start Menu shortcut changed",
+    "No remote push or publication"
+  ],
+  "delegations": {
+    "mac_research": "completed; source-verified only",
+    "windows_store": "timed out; parent recovered and verified saved code",
+    "windows_installer": "timed out; parent recovered and verified saved code"
+  }
+}

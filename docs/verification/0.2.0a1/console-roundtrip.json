@@ -1,0 +1,47 @@
+{
+  "installed_console": "/tmp/ballz-guided-wheel-de8zc5sv/bin/ballz",
+  "original_bytes_restored": true,
+  "records": [
+    {
+      "args": [
+        "--version"
+      ],
+      "returncode": 0,
+      "stdout": "Ballz2theWALL 0.2.0a1\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "on",
+        "claude",
+        "--home",
+        "/tmp/ballz-final-cli-6j_wweq1/agent",
+        "--state-dir",
+        "/tmp/ballz-final-cli-6j_wweq1/state"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"id\": \"8483fcea6bfd4b60923a657c2002264d\",\n  \"phase\": \"on\",\n  \"adapter\": \"claude\",\n  \"home\": \"/tmp/ballz-final-cli-6j_wweq1/agent\",\n  \"after_sha256\": \"23e36edea40adf2c8bca87497dbb4a9dd8b8c0064f8199426a3be16e03c7320b\",\n  \"receipt_id\": \"5efa417ecdad4434af342fdc83bf8162\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "status",
+        "--state-dir",
+        "/tmp/ballz-final-cli-6j_wweq1/state"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"id\": \"8483fcea6bfd4b60923a657c2002264d\",\n  \"phase\": \"on\",\n  \"adapter\": \"claude\",\n  \"home\": \"/tmp/ballz-final-cli-6j_wweq1/agent\",\n  \"after_sha256\": \"23e36edea40adf2c8bca87497dbb4a9dd8b8c0064f8199426a3be16e03c7320b\",\n  \"receipt_id\": \"5efa417ecdad4434af342fdc83bf8162\"\n}\n",
+      "stderr": ""
+    },
+    {
+      "args": [
+        "off",
+        "--state-dir",
+        "/tmp/ballz-final-cli-6j_wweq1/state"
+      ],
+      "returncode": 0,
+      "stdout": "{\n  \"schema\": 1,\n  \"id\": \"8483fcea6bfd4b60923a657c2002264d\",\n  \"phase\": \"off\",\n  \"adapter\": \"claude\",\n  \"home\": \"/tmp/ballz-final-cli-6j_wweq1/agent\",\n  \"after_sha256\": \"23e36edea40adf2c8bca87497dbb4a9dd8b8c0064f8199426a3be16e03c7320b\",\n  \"receipt_id\": \"5efa417ecdad4434af342fdc83bf8162\"\n}\n",
+      "stderr": ""
+    }
+  ]
+}

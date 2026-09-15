@@ -5,9 +5,34 @@
 A local-first skill + CLI that puts agent runtimes into their native full-access
 modes. Hermes first. OpenAI Codex and Anthropic Claude Code included.
 
-**Status: 0.1.1 alpha.** Python 3.11+. Linux/WSL tested; POSIX implementation,
-macOS unverified; native Windows writes are not supported yet. No hosted service,
+**Status: 0.2.0a1 local alpha.** Guided Windows and Mac installation included.
+Windows clean installation and native transactions tested. Mac installer/permission
+flow implemented but not yet tested on a physical Mac. No hosted service,
 account, telemetry, scheduler or background daemon.
+
+## Simple installation
+
+1. Extract the whole **Windows Setup ZIP** or **Mac Setup ZIP**.
+2. Double-click **Install-Windows.cmd** or **Install-Mac.command**.
+3. Follow the dialogs. Python installs privately; no Python/Git/Homebrew setup.
+4. Approve the requested Mac permissions/settings yourself, then choose **Turn ON**.
+
+Already-installed Hermes, OpenAI Codex or Claude Code required. One ready agent is
+selected automatically; multiple profiles show a choice. Each agent handles its
+own sign-in. Installing Ballz alone does not change any agent profile.
+
+Windows: reopen **Ballz2theWALL** from Start. Mac: open **Ballz2theWALL.command** in
+`~/Applications`. Mac permissions are requested for **Terminal**, which launches
+both setup and the selected agent. Existing unrelated background agents do not
+inherit these approvals. Windows installs for the current account without UAC;
+administrator-only work still needs a separately approved elevated launch.
+
+**OFF restores saved runtime settings after you close the agent window.** It does
+not kill existing processes, undo completed work or revoke macOS permissions.
+This is not yet the separate desktop companion/admin-helper product.
+
+These local-alpha bundles are not code-signed/notarized public installers.
+Details: [guided setup](docs/GUIDED-SETUP.md).
 
 ## Get moving
 
@@ -32,7 +57,7 @@ ballz run hermes --home "$HOME/.hermes" --cwd "$PWD" --interactive
 restart of existing gateways. A config write is not proof an already-running
 agent adopted it.
 
-Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.1.1-py3-none-any.whl`.
+Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.2.0a1-py3-none-any.whl`.
 No PyPI publication is claimed.
 
 ## One contract, three runtimes
@@ -130,9 +155,14 @@ the launched agent's output, tools and session logging remain that runtime's con
 ballz rollback RECEIPT_ID
 ```
 
-Default state: `${XDG_STATE_HOME:-~/.local/state}/ballz2thewall`.
+Default state: `${XDG_STATE_HOME:-~/.local/state}/ballz2thewall` on POSIX;
+`%LOCALAPPDATA%/Ballz2theWALL/state` on Windows.
 A custom `--state-dir /path` must be used consistently for apply and rollback.
-The state directory must be owned by the current user with mode `0700`.
+POSIX state uses owner-only `0700` directories and `0600` backups. Native Windows
+uses owner-only protected ACLs, byte-range locking, reparse/hardlink rejection and
+write-through atomic replacement. ON/OFF journals use an isolated transaction
+store beneath `controller/activations/`; use `ballz off`, not plain rollback, for
+these managed activations.
 
 - Atomic single-file replacements, verified hashes, advisory controller lock.
 - Original config bytes and mode retained; backups/receipts use `0600`.
@@ -163,7 +193,7 @@ ballz skill --dest "$HOME/.hermes/skills"
 ballz skill --dest "$HOME/.claude/skills"
 ```
 
-The installer writes only `ballz2thewall/SKILL.md` and returns a rollback receipt.
+The `ballz skill --dest` command writes only `ballz2thewall/SKILL.md` and returns a rollback receipt.
 For Codex or another host, select that host's documented skills root explicitly.
 Loading the skill itself does not activate full access.
 

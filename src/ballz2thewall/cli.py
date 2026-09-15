@@ -21,6 +21,8 @@ def output(value: dict) -> None:
 
 
 def state_root() -> Path:
+    if os.name == "nt":
+        return Path(os.getenv("LOCALAPPDATA", str(Path.home() / "AppData/Local"))) / "Ballz2theWALL/state"
     return Path(os.getenv("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "ballz2thewall"
 
 
@@ -58,6 +60,17 @@ def parser() -> argparse.ArgumentParser:
     skill = commands.add_parser("skill", help="Print or install the bundled agent skill")
     skill.add_argument("--dest", type=Path, help="Explicit skills root; writes ballz2thewall/SKILL.md only")
     skill.add_argument("--state-dir", type=Path, default=state_root())
+    setup = commands.add_parser("setup", help="Guided first-run OS permission and agent setup")
+    setup.add_argument("--gui", action="store_true", help="Native dialogs (default on Windows/macOS)")
+    setup.add_argument("--check", action="store_true", help="Inspect only; never request permissions or activate")
+    setup.add_argument("--state-dir", type=Path, default=state_root())
+    on = commands.add_parser("on", help="Enable one selected agent; journal its prior settings")
+    on.add_argument("adapter", choices=names)
+    on.add_argument("--home", required=True, type=Path)
+    on.add_argument("--state-dir", type=Path, default=state_root())
+    for action in ("off", "status"):
+        sub = commands.add_parser(action)
+        sub.add_argument("--state-dir", type=Path, default=state_root())
     return p
 
 
@@ -110,9 +123,35 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     return subprocess.run(argv, cwd=cwd, env=env, input=prompt, text=True, check=False).returncode
 
 
+def report_error(args, message: str) -> None:
+    output({"status": "error", "error": message})
+    if args.command == "setup" and getattr(args, "gui", False) and not args.check:
+        from .onboarding import Dialogs
+        try:
+            Dialogs().message("Setup needs attention", message + "\n\nReopen Ballz2theWALL to retry. No success is assumed.")
+        except (ValueError, OSError, subprocess.SubprocessError):
+            pass
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
+        if args.command in {"setup", "on", "off", "status"}:
+            from .onboarding import Activation, augment_path, check_setup, wizard
+            augment_path()
+            if args.command == "setup":
+                if args.check:
+                    output(check_setup(args.state_dir))
+                    return 0
+                return wizard(args.state_dir)
+            control = Activation(args.state_dir)
+            if args.command == "on":
+                output(control.enable(args.adapter, args.home))
+            elif args.command == "off":
+                output(control.disable())
+            else:
+                output(control.status())
+            return 0
         if args.command == "doctor":
             selected = [get_adapter(args.adapter)] if args.adapter else list(ADAPTERS.values())
             reports = [inspect_runtime(a, args.home) for a in selected]
@@ -153,10 +192,10 @@ def main(argv: list[str] | None = None) -> int:
             output(Store(args.state_dir).apply(plan))
         return 0
     except ValueError as exc:
-        output({"status": "error", "error": str(exc)})
+        report_error(args, str(exc))
         return 2
-    except (OSError, UnicodeError):
-        output({"status": "error", "error": "File or process operation failed; check explicit paths and access"})
+    except (OSError, UnicodeError, subprocess.SubprocessError):
+        report_error(args, "File or process operation failed; check explicit paths and access")
         return 2
     except KeyboardInterrupt:
         return 130

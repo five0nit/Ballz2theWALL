@@ -1,0 +1,56 @@
+[
+  {
+    "command": [
+      "uv",
+      "venv",
+      "--no-config",
+      "--python",
+      "3.11",
+      "--managed-python",
+      "/tmp/ballz-guided-wheel-de8zc5sv"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "Using CPython 3.11.15\nCreating virtual environment at: ballz-guided-wheel-de8zc5sv\nActivate with: source ballz-guided-wheel-de8zc5sv/bin/activate\n"
+  },
+  {
+    "command": [
+      "uv",
+      "pip",
+      "install",
+      "--no-config",
+      "--python",
+      "/tmp/ballz-guided-wheel-de8zc5sv/bin/python",
+      "/home/fiv30nit/projects/Ballz2theWALL/dist/ballz2thewall-0.2.0a1-py3-none-any.whl",
+      "pytest"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "Using Python 3.11.15 environment at: ballz-guided-wheel-de8zc5sv\nResolved 8 packages in 147ms\nPrepared 1 package in 8ms\nInstalled 8 packages in 11ms\n + ballz2thewall==0.2.0a1 (from file:///home/fiv30nit/projects/Ballz2theWALL/dist/ballz2thewall-0.2.0a1-py3-none-any.whl)\n + iniconfig==2.3.0\n + packaging==26.3\n + pluggy==1.6.0\n + pygments==2.21.0\n + pytest==9.1.1\n + pyyaml==6.0.3\n + tomlkit==0.15.1\n"
+  },
+  {
+    "command": [
+      "/tmp/ballz-guided-wheel-de8zc5sv/bin/python",
+      "-c",
+      "import ballz2thewall; assert \"site-packages\" in ballz2thewall.__file__; print(ballz2thewall.__version__,ballz2thewall.__file__)"
+    ],
+    "returncode": 0,
+    "stdout": "0.2.0a1 /tmp/ballz-guided-wheel-de8zc5sv/lib/python3.11/site-packages/ballz2thewall/__init__.py\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/tmp/ballz-guided-wheel-de8zc5sv/bin/python",
+      "-m",
+      "pytest",
+      "/home/fiv30nit/projects/Ballz2theWALL/tests",
+      "-q",
+      "-o",
+      "pythonpath=",
+      "--junitxml=/tmp/ballz-guided-wheel-de8zc5sv/wheel-tests.xml"
+    ],
+    "returncode": 0,
+    "stdout": "........................................................................ [ 15%]\n........................................................................ [ 31%]\n........................................................................ [ 47%]\n........................................................................ [ 63%]\n........................................................................ [ 79%]\n........................................................................ [ 95%]\n...............s...ss                                                    [100%]\n450 passed, 3 skipped in 17.54s\n",
+    "stderr": ""
+  }
+]
