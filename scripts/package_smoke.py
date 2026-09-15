@@ -31,6 +31,8 @@ def main():
             assert version.stdout.strip() == f"Ballz2theWALL {ballz2thewall.__version__}"
         results = []
         for name, adapter in ADAPTERS.items():
+            if name == "openclaw":
+                continue  # Separate two-file round trip below.
             home = root / name
             plan = make_plan(adapter, home)
             state = Store(root / "state")
@@ -50,6 +52,18 @@ def main():
             state.rollback(receipt["receipt_id"])
             assert not (home / adapter.filename).exists()
             results.append({"adapter": name, "roundtrip": "passed", "launch": "dry_run_only"})
+        from ballz2thewall.openclaw import OpenClawStore, make_plans
+        home = root / ".openclaw"
+        state = OpenClawStore(root / "openclaw-state")
+        receipt = state.apply(make_plans(home))
+        assert not any(p.public()["changed"] for p in make_plans(home))
+        result = subprocess.run(
+            [sys.executable, "-I", "-m", "ballz2thewall", "plan", "openclaw", "--home", str(home)],
+            capture_output=True, text=True, cwd=root, env=env, check=True)
+        assert all(not p["changed"] for p in json.loads(result.stdout)["files"])
+        state.rollback(receipt["receipt_id"])
+        assert all(not (home / filename).exists() for filename in ("openclaw.json", "exec-approvals.json"))
+        results.append({"adapter": "openclaw", "roundtrip": "passed", "launch": "not_invoked"})
         result = subprocess.run(
             [sys.executable, "-m", "ballz2thewall", "skill", "--dest", str(root / "skills"),
              "--state-dir", str(root / "state")],

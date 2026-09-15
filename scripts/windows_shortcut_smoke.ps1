@@ -13,6 +13,8 @@ $script:LogPath = $null
 $script:StatusLabel = $null
 $update = $ast.Find({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Update-Status' }, $true)
 . ([ScriptBlock]::Create($update.Extent.Text))
+$save = $ast.Find({ param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Save-SetupShortcut' }, $true)
+. ([ScriptBlock]::Create($save.Extent.Text))
 $blocks = @($ast.FindAll({ param($n) $n -is [Management.Automation.Language.IfStatementAst] -and $n.Extent.Text.StartsWith('if (-not $NoShortcut)') }, $true))
 if ($blocks.Count -ne 1) { throw 'Expected exactly one shortcut block' }
 New-Item -ItemType Directory -Path $TestPrograms -Force | Out-Null

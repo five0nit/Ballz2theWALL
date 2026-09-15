@@ -36,6 +36,23 @@ function Quote-Argument([string]$Value) {
     return '"' + [regex]::Replace([regex]::Replace($Value, '(\\*)"', '$1$1\"'), '(\\+)$', '$1$1') + '"'
 }
 
+function Save-SetupShortcut([string]$Python, [string]$ShortcutPath, [string]$WorkingDirectory) {
+    $shell = New-Object -ComObject WScript.Shell
+    try {
+        $shortcut = $shell.CreateShortcut($ShortcutPath)
+        $shortcut.TargetPath = $Python
+        $shortcut.Arguments = '-I -m ballz2thewall setup --gui'
+        $shortcut.WorkingDirectory = $WorkingDirectory
+        $shortcut.Description = 'Connect your agent and switch native access ON or OFF'
+        $shortcut.WindowStyle = 1
+        $shortcut.Save()
+        $check = $shell.CreateShortcut($ShortcutPath)
+        if ($check.TargetPath -ne $Python -or $check.Arguments -ne $shortcut.Arguments -or $check.WorkingDirectory -ne $WorkingDirectory) {
+            throw 'Start Menu shortcut verification failed.'
+        }
+    } finally { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null }
+}
+
 function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
     $info = New-Object Diagnostics.ProcessStartInfo
     $info.FileName = $Executable
@@ -69,6 +86,9 @@ function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
 }
 
 try {
+    if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or [Environment]::OSVersion.Version.Major -lt 10) {
+        throw 'Ballz2theWALL setup requires Windows 10 or newer. No installation was attempted.'
+    }
     if (-not $NonInteractive) {
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
@@ -197,18 +217,7 @@ Install location: $InstallRoot
         Update-Status 'Creating your Start Menu setup shortcut...'
         $programs = [Environment]::GetFolderPath('Programs')
         $shortcutPath = Join-Path $programs 'Ballz2theWALL.lnk'
-        $shell = New-Object -ComObject WScript.Shell
-        try {
-            $shortcut = $shell.CreateShortcut($shortcutPath)
-            $shortcut.TargetPath = $python
-            $shortcut.Arguments = '-I -m ballz2thewall setup --gui'
-            $shortcut.WorkingDirectory = $InstallRoot
-            $shortcut.Description = 'Connect your agent and switch native access ON or OFF'
-            $shortcut.WindowStyle = 1
-            $shortcut.Save()
-            $check = $shell.CreateShortcut($shortcutPath)
-            if ($check.TargetPath -ne $python -or $check.Arguments -ne $shortcut.Arguments) { throw 'Start Menu shortcut verification failed.' }
-        } finally { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null }
+        Save-SetupShortcut $python $shortcutPath $InstallRoot
     }
     $receiptPath = Join-Path $runtime 'install-receipt.json'
     $receipt = [ordered]@{

@@ -1,4 +1,4 @@
-# Guided setup — 0.2.0a1 local alpha
+# Guided setup — 0.2.0a2 unsigned alpha
 
 ## User path
 
@@ -44,7 +44,7 @@ scripts are not a signed/notarized application. Gatekeeper policy is not removed
 user, under `%LOCALAPPDATA%/Ballz2theWALL`; no system PATH edits or administrator
 request. It downloads SHA-256-pinned uv and managed Python, validates the bundled
 wheel, installs it, verifies the installed entrypoint and creates a verified
-Start Menu shortcut. Logs and `runtime/install-receipt.json` survive failures.
+Start Menu shortcut. Failure details remain in logs; the success-only `runtime/install-receipt.json` is written after successful installation and verification.
 
 The setup wizard checks native interactive-session and elevation state. Ordinary
 Windows desktop/terminal access does not have Mac-style permission toggles. UAC
@@ -54,6 +54,15 @@ a persistent administrative helper or promise lasting Administrator access.
 Testing flags: `-NonInteractive -NoLaunch -NoShortcut -InstallRoot PATH` exercise
 installation in a scratch directory without presenting dialogs or changing real
 shortcuts. They do not grant permissions or activate profiles.
+
+## OpenClaw scope
+
+OpenClaw is available on Linux/WSL and macOS with a standard `.openclaw` home.
+Its native embedded terminal prompt loop is launched without starting a gateway.
+Windows users with OpenClaw inside WSL must install Ballz inside WSL too; the
+native Windows installer does not bridge into WSL. Named profiles, remote/node
+execution and explicit per-agent runtime overrides are outside this alpha.
+See [the adapter contract](OPENCLAW.md) for the exact supported settings.
 
 ## ON and OFF
 

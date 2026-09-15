@@ -1,35 +1,56 @@
-# Verification — 0.2.0a1 guided-setup local alpha
+# Verification — 0.2.0a2 unsigned alpha
 
-Current machine evidence is in `verification/0.2.0a1/`; artifact binding is in
-`dist/RELEASE-0.2.0a1.json`. Historical runtime-parser and browser evidence remains
-in [0.1.1 verification](VERIFICATION-0.1.1.md), not relabeled as a Mac test.
+Machine-readable evidence: [gates.json](verification/0.2.0a2/gates.json).
+Previous evidence remains under [0.2.0a1](VERIFICATION-0.2.0a1.md) and
+[0.1.1](VERIFICATION-0.1.1.md); old artifacts were not replaced.
 
-Verified scope: source suite; immutable wheel; native Windows x64 private install,
-installed version/import provenance, owner-only transactions, cross-process
-locking, junction/hardlink rejection, ON/OFF original-byte restoration and dialog
-rendering. Test profiles and state are synthetic temporary directories only.
-Native GUI render is offscreen: it proves rendered controls, not user clicks.
+## Passing release gates
 
-Native macOS prompt/Settings/Terminal-responsibility acceptance, Windows ARM64,
-code signing/notarization and live authenticated model calls remain **unverified**.
-No real agent configuration, authentication, OS grant, gateway, public release or
-existing Start Menu shortcut was changed for verification.
+- Source: **535 passed, 3 skipped**. Ruff and whitespace checks passed.
+- Fresh, non-editable Python 3.11 wheel: **535 passed, 3 skipped**. Both installed
+  console entrypoints, four adapters' scratch round trips, and bundled skill
+  install/rollback exercised outside source imports.
+- OpenClaw targeted tests: **77 passed**. Independent spec review PASS and
+  code-quality review APPROVED; final reviewer independently ran the same 77 tests.
+- Native OpenClaw **2026.6.1**: **10 checks** including real CLI capability detection,
+  native config validation, two effective policy scopes, ON/OFF idempotence,
+  byte-identical restoration, restrictive-policy/schema negative controls,
+  unsupported profile rejection and ambient-home override pinning.
+- Native Windows x64 installer: **11 passed**, including private Python bootstrap,
+  wheel install, reinstall, source fallback, no global PATH or Start Menu changes,
+  PowerShell parsing, invalid-payload controls and COM shortcut readback.
+- Native Windows installed-wheel core/store: **35 passed, 1 skipped**. Eight native
+  store smoke groups pass; Windows ACLs are checked as ACLs, not POSIX bits.
+- Info page: four browser cases at 1440, 390 and 320 CSS pixels; keyboard/touch preview
+  switch, FAQ disclosure, download anchor, reduced motion and no-JavaScript fallback.
+  No horizontal overflow or console errors. Desktop and phone screenshots visually reviewed.
+- ZIP contents, Mac executable bit, SHA-256 manifests and embedded wheel equality checked.
 
-`pytest` skips platform-exclusive cases on the wrong host; record them separately.
-The native Windows gate uses the actual installed wheel, not source imports.
-Final exact counts and command results are recorded in `verification/0.2.0a1/gates.json`.
+Source/fresh-wheel skips are the opt-in network installation test and native-only
+Windows tests. Installation and Windows cases are exercised separately.
+The one native-Windows skip is the POSIX-only permission-mode test.
 
-- Source: **450 passed, 3 skipped**.
-- Fresh Python 3.11 wheel: **450 passed, 3 skipped**, outside the source tree.
-- Native Windows installed-wheel subset: **26 passed, 2 skipped**.
-- Native Windows Store: **8 check groups passed**.
-- Native shortcut: actual COM creation/readback passed with only Programs redirected to scratch.
-- Installed `ballz` console: version, ON, status, OFF, and exact original-byte restoration passed.
-- Ruff and Mac shell syntax checks passed. Staged whitespace checks passed with
-  `core.whitespace=blank-at-eol,space-before-tab,cr-at-eol,-blank-at-eof`; raw Windows
-  CRLF and terminal log blank lines are retained verbatim.
+## Audit corrections
 
-Preflight: see `discovery/GUIDED-INSTALL.md`. Automated discovery was inconclusive;
-manual inspection retained the canonical MIT controller, selected uv as bootstrap
-utility and native dialogs/APIs for onboarding. Cua companion integration remains
-outside this increment; no universal desktop-control claim follows from setup.
+- Removed incompatible legacy exec security/ask fields when writing modern OpenClaw mode.
+- Pinned its separate native approval-home resolver; named/custom layouts are rejected.
+- Reject explicit ACP/other per-agent runtime overrides before writes.
+- Hardened Mac interpreter isolation and preflight; tested immutable installer wheel snapshots.
+- Corrected narrow-phone heading overflow and platform-specific test expectations.
+- First WSL-to-Windows invocation failed with `UtilAcceptVsock` before application
+  execution. The complete installer suite was rerun successfully; failures were not reclassified.
+- Historical secret scan: three false positives individually examined: two source-file
+  SHA-256 metadata entries and one printed CLI credential-reference syntax. Exact
+  historical fingerprints alone are allowlisted in `.gitleaksignore`; no path-wide exemptions.
+
+## Explicitly outside acceptance
+
+Real Mac installer/permission prompts/Terminal TCC attribution, Windows ARM64,
+authenticated model execution, signing/notarization and a universal desktop-control
+companion remain **unverified or unimplemented**. The Mac ZIP is experimental.
+No model calls, real agent-home activation, OS grant changes or gateway restarts
+were performed. Native parser/policy checks are not model-session tests.
+
+OpenClaw uses the default local `.openclaw` layout on Linux/WSL; Mac source support
+is not a hardware acceptance claim. Read [OPENCLAW.md](OPENCLAW.md) for exact scope.
+OFF restores stored settings; it does not stop existing agents or undo their work.

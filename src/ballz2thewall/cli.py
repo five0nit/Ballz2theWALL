@@ -50,7 +50,7 @@ def parser() -> argparse.ArgumentParser:
             sub.add_argument("--dry-run", action="store_true", help="Render launch metadata, resolve no secrets")
             mode = sub.add_mutually_exclusive_group(required=True)
             mode.add_argument("--prompt", help="One-shot prompt (use --prompt-file to avoid process-list exposure)")
-            mode.add_argument("--prompt-file", type=Path, help="UTF-8 prompt file; '-' reads stdin")
+            mode.add_argument("--prompt-file", type=Path, help="UTF-8 prompt file; '-' reads stdin. OpenClaw forwards content through native --message")
             mode.add_argument("--interactive", action="store_true")
     back = commands.add_parser("rollback")
     back.add_argument("receipt_id")
@@ -79,7 +79,9 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     # Validate before probing native CLIs or resolving any credential.
     descriptors = describe_bindings(args.secret)
     reserved = {"HERMES_HOME", "CODEX_HOME", "CLAUDE_CONFIG_DIR", "HOME", "PATH",
-                "TERMINAL_ENV", "TERMINAL_CWD", "HERMES_YOLO_MODE", "BROWSER_CDP_URL"}
+                "TERMINAL_ENV", "TERMINAL_CWD", "HERMES_YOLO_MODE", "BROWSER_CDP_URL",
+                "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH", "OPENCLAW_OAUTH_DIR", "OPENCLAW_HOME",
+                "OPENCLAW_AGENT_DIR", "PI_CODING_AGENT_DIR", "OPENCLAW_PROFILE"}
     if any(binding.split("=", 1)[0] in reserved for binding in args.secret):
         raise ValueError("Credential bindings cannot replace runtime scope or executable resolution variables")
     argv = adapter.argv(interactive=args.interactive, model=args.model, chrome=args.chrome,
@@ -104,7 +106,9 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     if args.dry_run:
         output({"status": "dry_run", "adapter": adapter.name, "argv": argv, "cwd": str(cwd),
                 "environment_overrides": env_updates, "credentials": descriptors,
-                "prompt": "interactive" if args.interactive else "stdin; content omitted",
+                "prompt": ("interactive" if args.interactive else
+                           "native --message; content omitted" if adapter.name == "openclaw"
+                           else "stdin; content omitted"),
                 "auth": "native runtime retains its own auth store"})
         return 0
     report = require_runtime(adapter, home)
@@ -119,7 +123,14 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     env = dict(os.environ)
     env.update(resolve_bindings(args.secret))
     env.update(env_updates)
-    # No shell interpolation. Prompt travels through stdin, never inserted into argv.
+    if adapter.name == "openclaw":
+        from .openclaw import make_plans
+        from .openclaw_runtime import launch, verify_native
+        if any(p.before != p.after for p in make_plans(home)):
+            raise ValueError("OpenClaw policy is not ON; use ballz on or ballz apply first")
+        verify_native(home, argv[0])
+        return launch(argv, prompt, args.interactive, cwd, env)
+    # Other adapters accept stdin. OpenClaw requires its native --message flag.
     return subprocess.run(argv, cwd=cwd, env=env, input=prompt, text=True, check=False).returncode
 
 
@@ -159,7 +170,10 @@ def main(argv: list[str] | None = None) -> int:
                     "provider_rules": "unchanged", "browser_auth": "not_probed"})
             return 0 if all(r["status"] == "ready" for r in reports) else 2
         if args.command == "rollback":
-            output(Store(args.state_dir).rollback(args.receipt_id))
+            from .openclaw import OpenClawStore
+            bundle = checked_path(args.state_dir / f"{args.receipt_id}.bundle.json")
+            store = OpenClawStore(args.state_dir) if bundle.exists() else Store(args.state_dir)
+            output(store.rollback(args.receipt_id))
             return 0
         if args.command == "browser-check":
             from .browser import probe_cdp
@@ -184,6 +198,16 @@ def main(argv: list[str] | None = None) -> int:
         adapter.settings(cdp, args.inherit_secrets)
         if args.command == "run":
             return run(args, adapter, home, cdp)
+        if adapter.name == "openclaw":
+            from .openclaw import OpenClawStore, make_plans
+            from .openclaw_runtime import apply_verified
+            plans = make_plans(home)
+            if args.command == "plan":
+                output({"adapter": "openclaw", "files": [p.public() for p in plans]})
+            else:
+                report = require_runtime(adapter, home)
+                output(apply_verified(OpenClawStore(args.state_dir), plans, home, report["executable"]))
+            return 0
         plan = make_plan(adapter, home, cdp, args.inherit_secrets)
         if args.command == "plan":
             output(plan.public())

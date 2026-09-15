@@ -1,5 +1,9 @@
 """API-boundary tests, not a claim that macOS granted a permission."""
 import json
+import os
+import subprocess
+import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -87,3 +91,29 @@ def test_mac_requests_impossible_on_other_platform(monkeypatch):
     monkeypatch.setattr(ob.platform, "system", lambda: "Linux")
     with pytest.raises(ValueError, match="Terminal"):
         ob.request_mac("accessibility")
+
+
+def test_mac_installer_isolation_and_preflight(tmp_path):
+    script = Path(__file__).resolve().parents[1] / "installers/Install-Mac.command"
+    content = script.read_text()
+    assert subprocess.run(["bash", "-n", str(script)], capture_output=True).returncode == 0
+    assert '"$PYTHON" -m' not in content
+    assert '"$PYTHON" - ' not in content
+    assert " -I -m ballz2thewall setup --gui" in content
+    for check in ("sw_vers", "Unsupported Mac processor", "Incomplete package", "Missing package", "cancel button"):
+        assert content.index(check) < content.index('mkdir -p "$ROOT"')
+    assert content.index("Runtime download checksum mismatch") < content.index("/usr/bin/tar -xzf")
+    # Execute the real launcher-writer payload, including -I, with poisoned
+    # current-directory/PYTHONPATH imports and a shell-metacharacter path.
+    writer = content.split('"$LAUNCHER" <<\'PY\'\n', 1)[1].split("\nPY", 1)[0]
+    (tmp_path / "pathlib.py").write_text("raise RuntimeError('untrusted import')")
+    launcher = tmp_path / "launcher.command"
+    python = str(tmp_path / "space & apostrophe's" / "python")
+    result = subprocess.run([sys.executable, "-I", "-", python, str(launcher)], input=writer,
+                            text=True, capture_output=True, cwd=tmp_path,
+                            env={**os.environ, "PYTHONPATH": str(tmp_path)})
+    assert result.returncode == 0, result.stderr
+    import shlex
+    assert shlex.split(launcher.read_text().split("exec ")[1]) == [
+        python, "-I", "-m", "ballz2thewall", "setup", "--gui",
+    ]

@@ -100,6 +100,9 @@ def test_bootstrap_integrity_and_scope_contract():
     ):
         assert contract in script
     assert script.index("Wheel SHA-256 mismatch") < script.index("DownloadFileTaskAsync")
+    assert script.index("requires Windows 10 or newer") < script.index("New-Item -ItemType Directory")
+    assert "Invoke-Checked $python @('-I', '-m', 'ballz2thewall', '--version')" in script
+    assert "Start-Process -FilePath $python -ArgumentList '-I -m ballz2thewall setup --gui'" in script
 
 
 def test_native_powershell_parser():
@@ -176,6 +179,30 @@ def test_native_argument_quoting():
     assert json.loads(result.stdout) == [
         '"space path"', '"apostrophe\'s & literal"', '"double\\"quote"', '"C:\\trailing\\\\"', '""',
     ]
+
+
+def test_native_shortcut_in_scratch_only(windows_scratch):
+    target = windows_scratch / "space & apostrophe's python.exe"
+    shortcut = windows_scratch / "Ballz2theWALL.lnk"
+    # Load only the production shortcut function; do not run the installer.
+    result = powershell(
+        "$tokens=$null; $errors=$null; $ast=[Management.Automation.Language.Parser]::ParseFile("
+        f"{ps_quote(native_path(INSTALLER))}, [ref]$tokens, [ref]$errors); "
+        "$fn=$ast.Find({param($n) $n -is [Management.Automation.Language.FunctionDefinitionAst] "
+        "-and $n.Name -eq 'Save-SetupShortcut'}, $true); Invoke-Expression $fn.Extent.Text; "
+        f"Save-SetupShortcut {ps_quote(native_path(target))} {ps_quote(native_path(shortcut))} "
+        f"{ps_quote(native_path(windows_scratch))}; "
+        "$s=New-Object -ComObject WScript.Shell; "
+        f"$c=$s.CreateShortcut({ps_quote(native_path(shortcut))}); "
+        "@{target=$c.TargetPath; arguments=$c.Arguments; cwd=$c.WorkingDirectory} | ConvertTo-Json -Compress; "
+        "[Runtime.InteropServices.Marshal]::FinalReleaseComObject($s) | Out-Null"
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert shortcut.exists()
+    assert json.loads(result.stdout) == {
+        "target": native_path(target), "arguments": "-I -m ballz2thewall setup --gui",
+        "cwd": native_path(windows_scratch),
+    }
 
 
 @pytest.mark.skipif(os.getenv("B2W_WINDOWS_INSTALL_SMOKE") != "1", reason="Opt-in network/private-runtime smoke")

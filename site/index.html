@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeeade">
+  <meta name="description" content="A local switch for your agent’s native execution controls. Keep your existing agent and sign-in. Enable native full-access settings, then restore them when you’re done.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Ballz2theWALL — Install. Approve. Turn ON.">
+  <meta property="og:description" content="Local execution controls for Hermes, OpenAI Codex, Claude Code and local-host OpenClaw. Your agent. Your sign-in. One deliberate switch. Unsigned alpha.">
+  <title>Ballz2theWALL — Install. Approve. Turn ON.</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header frame">
+    <a class="brand" href="./" aria-label="Ballz2theWALL home">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
+      <span>Ballz<span class="brand-small">2the</span>WALL</span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#runtimes">The agents</a>
+      <a class="nav-source" href="https://github.com/five0nit/Ballz2theWALL">Source <span aria-hidden="true">↗</span></a>
+      <a class="nav-download" href="#download">Get the alpha <span aria-hidden="true">↓</span></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero frame" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="square" aria-hidden="true"></span> Local agent control <span class="eyebrow-divider">/</span> v0.2.0a2</p>
+        <h1 id="hero-title">Install.<br>Approve.<br><span>Turn ON.</span></h1>
+        <p class="hero-description">Your agent’s native execution controls.<br>One deliberate switch.</p>
+        <p class="hero-detail">Keep your existing agent and sign-in. Choose a profile, enable its native full-access settings, and restore the saved configuration when you’re done.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#download">Get the alpha <span aria-hidden="true">↓</span></a>
+          <a class="text-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/GUIDED-SETUP.md">Read the setup guide <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="release-note">Windows + Mac <span aria-hidden="true">·</span> Unsigned alpha <span aria-hidden="true">·</span> MIT licensed</p>
+      </div>
+
+      <figure class="demo" aria-labelledby="demo-caption">
+        <div class="switch-plate" data-state="off">
+          <span class="screw screw-tl" aria-hidden="true"></span>
+          <span class="screw screw-tr" aria-hidden="true"></span>
+          <span class="screw screw-bl" aria-hidden="true"></span>
+          <span class="screw screw-br" aria-hidden="true"></span>
+          <div class="plate-heading">
+            <span class="plate-title">Native<br>execution</span>
+            <span class="plate-model">B2/W<br>LOCAL</span>
+          </div>
+          <div class="plate-rule" aria-hidden="true"></div>
+          <div class="switch-assembly">
+            <span class="switch-side-label" aria-hidden="true">MANUAL CONTROL</span>
+            <div class="rocker-frame">
+              <button class="rocker" id="preview-switch" type="button" aria-label="Toggle native execution preview" aria-pressed="false" aria-describedby="demo-caption" disabled>
+                <span class="rocker-on" aria-hidden="true"><span class="power-line"></span><span class="rocker-word">ON</span></span>
+                <span class="rocker-off" aria-hidden="true"><span class="power-circle"></span><span class="rocker-word">OFF</span></span>
+              </button>
+            </div>
+            <span class="switch-side-label switch-side-label-right" aria-hidden="true">NATIVE SETTINGS</span>
+          </div>
+          <div class="plate-status" role="status" aria-live="polite" aria-atomic="true">
+            <span class="status-light" aria-hidden="true"></span>
+            <span id="preview-state">OFF</span>
+            <span id="preview-label">Saved settings</span>
+          </div>
+          <p class="plate-instruction" id="preview-hint">Enable JavaScript to try the switch.</p>
+          <span class="plate-serial" aria-hidden="true">B2/W — EXECUTION CONTROL</span>
+        </div>
+        <figcaption id="demo-caption"><span class="demo-pointer" aria-hidden="true">↳</span> Interactive preview — not connected to your machine</figcaption>
+      </figure>
+    </section>
+
+    <div class="principles frame" aria-label="Product principles">
+      <p><span class="principle-mark" aria-hidden="true">01</span> Local, not hosted.</p>
+      <p><span class="principle-mark" aria-hidden="true">02</span> Your sign-in stays yours.</p>
+      <p><span class="principle-mark" aria-hidden="true">03</span> Settings you can restore.</p>
+    </div>
+
+    <section class="runtimes section frame" id="runtimes" aria-labelledby="runtimes-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">01 / The connections</p>
+          <h2 id="runtimes-title">Not another agent.<br>A switch for yours.</h2>
+        </div>
+        <p class="section-intro">Ballz works with the agent CLI you already have. It changes native runtime settings—not your model, account, or provider’s rules.</p>
+      </div>
+      <div class="runtime-list">
+        <article class="runtime-row">
+          <div class="runtime-name"><span class="runtime-index" aria-hidden="true">H /</span><h3>Hermes</h3></div>
+          <div class="runtime-detail"><p>Native approval controls. Local terminal execution.</p><code>--yolo</code></div>
+          <a class="runtime-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/ADAPTERS.md" aria-label="Read the Hermes adapter documentation">Adapter notes <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="runtime-row">
+          <div class="runtime-name"><span class="runtime-index" aria-hidden="true">C /</span><h3>OpenAI Codex</h3></div>
+          <div class="runtime-detail"><p>Native full-access mode. Existing CLI authentication.</p><code>--dangerously-bypass-approvals-and-sandbox</code></div>
+          <a class="runtime-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/ADAPTERS.md" aria-label="Read the OpenAI Codex adapter documentation">Adapter notes <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="runtime-row">
+          <div class="runtime-name"><span class="runtime-index" aria-hidden="true">A /</span><h3>Claude Code</h3></div>
+          <div class="runtime-detail"><p>Native permission mode. Native shell sandbox settings.</p><code>--dangerously-skip-permissions</code></div>
+          <a class="runtime-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/ADAPTERS.md" aria-label="Read the Claude Code adapter documentation">Adapter notes <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="runtime-row">
+          <div class="runtime-name"><span class="runtime-index" aria-hidden="true">O /</span><h3>OpenClaw</h3></div>
+          <div class="runtime-detail"><p>Embedded local execution. Default .openclaw home only.</p><span class="scope-label">Linux / WSL / Mac · no named profiles or remote nodes</span></div>
+          <a class="runtime-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/OPENCLAW.md" aria-label="Read the OpenClaw adapter documentation">Adapter notes <span aria-hidden="true">↗</span></a>
+        </article>
+      </div>
+      <p class="runtime-footnote">Bring an installed, signed-in agent. Ballz does not install the agent itself, migrate credentials, or restart existing gateways.</p>
+    </section>
+
+    <section class="download-section" id="download" aria-labelledby="download-title">
+      <div class="frame download-inner">
+        <div class="download-heading">
+          <p class="eyebrow"><span class="square" aria-hidden="true"></span> 02 / Make the connection</p>
+          <h2 id="download-title">A small install.<br><span>A deliberate switch.</span></h2>
+          <p class="download-intro">No Python, Git, or Homebrew setup. The guided installer handles its private Python environment. You choose what gets turned on.</p>
+        </div>
+        <ol class="setup-steps">
+          <li><span class="step-number" aria-hidden="true">1</span><div><h3>Extract &amp; install.</h3><p>Extract the entire ZIP. Double-click the installer for your platform.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">2</span><div><h3>Approve &amp; select.</h3><p>Review requested OS permissions. Choose your installed agent and profile.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">3</span><div><h3>Turn ON. Start your agent.</h3><p>Installing alone changes no agent profile. ON is the explicit write action.</p></div></li>
+        </ol>
+
+        <div class="download-packages">
+          <div class="package-heading"><span>Guided installers</span><span>v0.2.0a2 / alpha</span></div>
+          <article class="package">
+            <div class="package-title"><h3>Windows</h3><span class="package-format">.ZIP</span></div>
+            <p>Per-user installation. Open from Start.</p>
+            <p class="package-note">For Hermes, Codex and Claude Code. OpenClaw users: install the wheel inside WSL instead.</p>
+            <p class="installer-name">Run <code>Install-Windows.cmd</code></p>
+            <a class="button button-download" href="https://github.com/five0nit/Ballz2theWALL/releases/download/v0.2.0a2/Ballz2theWALL-0.2.0a2-Windows-Setup.zip">Download for Windows <span aria-hidden="true">↓</span></a>
+            <p class="package-note">No automatic Administrator access. Elevated work still requires its own approval.</p>
+          </article>
+          <article class="package">
+            <div class="package-title"><h3>Mac</h3><span class="package-format">macOS 11+</span></div>
+            <p>Terminal-based setup. Launch from Applications.</p>
+            <p class="installer-name">Run <code>Install-Mac.command</code></p>
+            <a class="button button-download button-download-secondary" href="https://github.com/five0nit/Ballz2theWALL/releases/download/v0.2.0a2/Ballz2theWALL-0.2.0a2-Mac-Setup.zip">Download for Mac <span aria-hidden="true">↓</span></a>
+            <p class="package-note">Physical Mac approval flow and Terminal permission attribution are not yet tested.</p>
+          </article>
+        </div>
+        <div class="alpha-disclosure">
+          <span class="alpha-label">Read before installing</span>
+          <p>These are unsigned alpha packages, not signed or notarized applications. First install needs an internet connection. Windows x64 installation has been exercised; Windows ARM64 and physical Mac acceptance remain unverified.</p>
+          <div class="download-links"><a href="https://github.com/five0nit/Ballz2theWALL/releases/tag/v0.2.0a2">Release files &amp; checksums <span aria-hidden="true">↗</span></a><a href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/GUIDED-SETUP.md">Full installation guide <span aria-hidden="true">↗</span></a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="boundaries section frame" aria-labelledby="boundaries-title">
+      <div class="section-heading">
+        <div><p class="eyebrow">03 / Know the switch</p><h2 id="boundaries-title">More execution.<br>Not magic access.</h2></div>
+        <p class="section-intro">Full-access settings let your agent act with fewer runtime approval stops. Use them for work and files you intend that agent to access.</p>
+      </div>
+      <div class="boundaries-content">
+        <aside class="off-note">
+          <span class="off-symbol" aria-hidden="true">O</span>
+          <h3>OFF restores settings.<br>It is not a kill switch.</h3>
+          <p>Close the agent window first. OFF restores the saved runtime configuration. It does not stop running tasks, undo completed work, or revoke OS permissions.</p>
+          <a class="text-link" href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/GUIDED-SETUP.md#on-and-off">Understand ON / OFF <span aria-hidden="true">↗</span></a>
+        </aside>
+        <div class="faq" aria-label="Common questions">
+          <details>
+            <summary>Does this control my whole desktop?<span class="disclosure-mark" aria-hidden="true"></span></summary>
+            <div class="faq-answer"><p>No. Ballz configures supported agent runtimes; it is not a universal desktop-control layer. Your agent still needs its own tools, browser integration, and OS access. It runs with the access of the launching account—not automatic root or Administrator privileges.</p></div>
+          </details>
+          <details>
+            <summary>What happens to my sign-in?<span class="disclosure-mark" aria-hidden="true"></span></summary>
+            <div class="faq-answer"><p>Your agent keeps its own OAuth or API authentication. Ballz does not copy credentials between runtime homes, create a hosted account, or log in a fresh profile for you. Select the agent profile you already use.</p></div>
+          </details>
+          <details>
+            <summary>Is this a model-policy bypass?<span class="disclosure-mark" aria-hidden="true"></span></summary>
+            <div class="faq-answer"><p>No. These are native runtime execution controls, not a provider-policy bypass. Provider rules, organization policies, instruction-file guards, and tool availability still apply. OpenClaw ON changes its configured local tool allow/deny policy; OFF restores it. Changing a local setting does not change the model’s behavior or rules.</p></div>
+          </details>
+          <details>
+            <summary>How does restoring settings work?<span class="disclosure-mark" aria-hidden="true"></span></summary>
+            <div class="faq-answer"><p>Ballz saves original configuration bytes and a local transaction receipt before applying settings. OFF uses the managed activation record to restore them. If files have changed since activation or receipts cannot be verified, restoration stops rather than overwriting newer edits. No task actions are undone.</p></div>
+          </details>
+          <details>
+            <summary>What is the Mac alpha limitation?<span class="disclosure-mark" aria-hidden="true"></span></summary>
+            <div class="faq-answer"><p>The macOS 11+ installer uses Terminal for setup and agent launch. You must approve requested permissions yourself. The physical approval flow and Terminal attribution have not been tested on a real Mac; existing daemons or unrelated background agents do not inherit those approvals. The package is not signed or notarized.</p><a href="https://github.com/five0nit/Ballz2theWALL/blob/main/docs/VERIFICATION.md">Read the verification record <span aria-hidden="true">↗</span></a></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="source-strip frame" aria-labelledby="source-title">
+      <div><p class="eyebrow">No black box</p><h2 id="source-title">Read it. Run it. Make it yours.</h2><p>Open source. MIT licensed. No account, telemetry, or background daemon.</p></div>
+      <a class="button button-outline" href="https://github.com/five0nit/Ballz2theWALL">View on GitHub <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+
+  <footer class="site-footer frame">
+    <a class="brand footer-brand" href="./" aria-label="Ballz2theWALL home">Ballz<span class="brand-small">2the</span>WALL</a>
+    <p>Actual permissions. Not magic prompts.</p>
+    <nav aria-label="Footer navigation"><a href="https://github.com/five0nit/Ballz2theWALL/blob/main/README.md">Docs <span aria-hidden="true">↗</span></a><a href="https://github.com/five0nit/Ballz2theWALL/issues">Issues <span aria-hidden="true">↗</span></a><a href="https://github.com/five0nit/Ballz2theWALL/blob/main/LICENSE">MIT <span aria-hidden="true">↗</span></a></nav>
+  </footer>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import json
+import os
 import stat
 from pathlib import Path
 
@@ -6,10 +7,11 @@ import pytest
 
 from ballz2thewall.adapters import ADAPTERS, get_adapter
 from ballz2thewall.config import make_plan, parse
+from ballz2thewall.platform_store import validate_state_files
 from ballz2thewall.store import Store, digest
 
 
-@pytest.mark.parametrize("name", ADAPTERS)
+@pytest.mark.parametrize("name", [n for n in ADAPTERS if n != "openclaw"])
 def test_apply_idempotent_rollback_exact_bytes(tmp_path, name):
     a = get_adapter(name)
     home = tmp_path / "home"
@@ -22,6 +24,7 @@ def test_apply_idempotent_rollback_exact_bytes(tmp_path, name):
     target = home / a.filename
     target.write_bytes(originals[name])
     target.chmod(0o640)
+    original_mode = stat.S_IMODE(target.stat().st_mode)
     plan = make_plan(a, home)
     assert "TEST_ONLY_SENTINEL" not in json.dumps(plan.public())
     result = Store(tmp_path / "state").apply(plan)
@@ -32,17 +35,21 @@ def test_apply_idempotent_rollback_exact_bytes(tmp_path, name):
         assert parsed["approvals"]["deny"] == ['git push --force*']
     if name == "claude":
         assert parsed["permissions"]["deny"] == ["Read(.env)"]
-    assert stat.S_IMODE(target.stat().st_mode) == 0o640
+    assert stat.S_IMODE(target.stat().st_mode) == original_mode
     assert Store(tmp_path / "state").apply(make_plan(a, home))["status"] == "unchanged"
     record = Path(result["receipt"]).read_text()
     assert "TEST_ONLY_SENTINEL" not in record
-    assert stat.S_IMODE(Path(result["receipt"]).stat().st_mode) == 0o600
+    if os.name == "nt":
+        validate_state_files(tmp_path / "state")  # Native owner-only ACL, not POSIX mode bits.
+    else:
+        assert stat.S_IMODE(Path(result["receipt"]).stat().st_mode) == 0o600
     assert Store(tmp_path / "state").rollback(result["receipt_id"])["status"] == "rolled_back"
     assert target.read_bytes() == originals[name]
+    assert stat.S_IMODE(target.stat().st_mode) == original_mode
     assert Store(tmp_path / "state").rollback(result["receipt_id"])["status"] == "already_rolled_back"
 
 
-@pytest.mark.parametrize("name", ADAPTERS)
+@pytest.mark.parametrize("name", [n for n in ADAPTERS if n != "openclaw"])
 def test_new_file_removed_on_rollback(tmp_path, name):
     a = get_adapter(name)
     home = tmp_path / "new-home"
@@ -163,7 +170,7 @@ def test_argv_contract(name, flag):
     a = get_adapter(name)
     assert flag in a.argv(interactive=False)
     assert flag in a.argv(interactive=True)
-    assert a.environment(Path("/explicit"))[a.home_env] == "/explicit"
+    assert a.environment(Path("/explicit"))[a.home_env] == str(Path("/explicit"))
 
 
 def test_aliases_and_options():

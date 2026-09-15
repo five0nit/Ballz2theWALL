@@ -29,6 +29,8 @@ def main():
         root = Path(temp)
         state = Store(root / "state")
         for name, adapter in ADAPTERS.items():
+            if name == "openclaw":
+                continue  # Its two-file/native policy gate is openclaw_native_smoke.py.
             home = root / name
             receipt = state.apply(make_plan(adapter, home))
             reports[name] = inspect_runtime(adapter, home)

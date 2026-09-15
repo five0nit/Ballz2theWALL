@@ -1,0 +1,4 @@
+# Reviewed historical false positives only: test-source SHA-256 and CLI help syntax.
+ee566ac0940f4af4ea9ff023b159b24cc3bae9a0:docs/verification/0.1.1/gates.json:generic-api-key:44
+43b59abe02dbfa7f6cd0b17ff9373d402d5667f9:docs/verification/gates.json:generic-api-key:124
+43b59abe02dbfa7f6cd0b17ff9373d402d5667f9:docs/verification/gates.json:generic-api-key:133

@@ -3,6 +3,15 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  windows-store:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install '.[dev]'
+      - run: python -m pytest -q tests/test_core.py tests/test_windows_store.py tests/test_windows_installer.py
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -3,12 +3,15 @@
 **Less asking. More doing. Actual permissions, not magic prompts.**
 
 A local-first skill + CLI that puts agent runtimes into their native full-access
-modes. Hermes first. OpenAI Codex and Anthropic Claude Code included.
+modes. Hermes, OpenAI Codex, Anthropic Claude Code and local OpenClaw included.
 
-**Status: 0.2.0a1 local alpha.** Guided Windows and Mac installation included.
+**Status: 0.2.0a2 public alpha.** Guided Windows and Mac installation included.
 Windows clean installation and native transactions tested. Mac installer/permission
 flow implemented but not yet tested on a physical Mac. No hosted service,
 account, telemetry, scheduler or background daemon.
+
+[Info page](https://five0nit.github.io/Ballz2theWALL/) ·
+[Download alpha](https://github.com/five0nit/Ballz2theWALL/releases/tag/v0.2.0a2)
 
 ## Simple installation
 
@@ -17,7 +20,7 @@ account, telemetry, scheduler or background daemon.
 3. Follow the dialogs. Python installs privately; no Python/Git/Homebrew setup.
 4. Approve the requested Mac permissions/settings yourself, then choose **Turn ON**.
 
-Already-installed Hermes, OpenAI Codex or Claude Code required. One ready agent is
+Already-installed Hermes, OpenAI Codex, Claude Code or supported OpenClaw required. One ready agent is
 selected automatically; multiple profiles show a choice. Each agent handles its
 own sign-in. Installing Ballz alone does not change any agent profile.
 
@@ -31,7 +34,8 @@ administrator-only work still needs a separately approved elevated launch.
 not kill existing processes, undo completed work or revoke macOS permissions.
 This is not yet the separate desktop companion/admin-helper product.
 
-These local-alpha bundles are not code-signed/notarized public installers.
+These alpha bundles are unsigned and not notarized. OpenClaw runs on Linux/WSL
+and macOS, not the native Windows installer. Physical Mac acceptance is pending.
 Details: [guided setup](docs/GUIDED-SETUP.md).
 
 ## Get moving
@@ -57,10 +61,10 @@ ballz run hermes --home "$HOME/.hermes" --cwd "$PWD" --interactive
 restart of existing gateways. A config write is not proof an already-running
 agent adopted it.
 
-Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.2.0a1-py3-none-any.whl`.
+Prefer an immutable wheel for deployment: `uv tool install /absolute/path/to/ballz2thewall-0.2.0a2-py3-none-any.whl`.
 No PyPI publication is claimed.
 
-## One contract, three runtimes
+## One control, four runtimes
 
 - **Hermes:** `--yolo`, persistent `approvals.mode: off`, unattended/cron/single-query
   approvals set to `approve`, local terminal backend and private/LAN URL access.
@@ -70,6 +74,11 @@ No PyPI publication is claimed.
   secret-name filter; explicit existing exclusion rules remain.
 - **Anthropic Claude Code:** `--dangerously-skip-permissions`, persistent
   `permissions.defaultMode = "bypassPermissions"`, native shell sandbox disabled.
+- **OpenClaw:** embedded `agent --local`, native full exec/tool policy plus host
+  approvals, sandbox off, and a recoverable two-file ON/OFF transaction.
+  Schema and effective policy verified by the installed CLI before reporting ON.
+  Scope: default `.openclaw` layout on Linux/WSL/macOS; no named profiles, remote
+  gateways or nodes. Tested against OpenClaw **2026.6.1**. [Exact contract](docs/OPENCLAW.md).
 
 `openai` aliases `codex`; `anthropic` aliases `claude`. These adapt the actual
 agent CLIs, not remote model APIs. API access alone cannot grant filesystem or
@@ -92,7 +101,7 @@ Stored messaging `terminal.cwd` does not block CLI launch: the selected `--cwd`
 is passed to the native process and `TERMINAL_CWD`. Explicit Hermes roots are
 pinned with `--profile default`; named profile homes retain their native pinning.
 Sticky `active_profile` markers are left untouched.
-Native deny rules, instruction-file guards, configured tools, hook trust,
+For Hermes/Codex/Claude, native deny rules, instruction-file guards, configured tools, hook trust,
 organization policies and provider-side rules are not rewritten. Operating-system
 access is that of the launching account, not automatic root/Administrator.
 
@@ -165,6 +174,8 @@ store beneath `controller/activations/`; use `ballz off`, not plain rollback, fo
 these managed activations.
 
 - Atomic single-file replacements, verified hashes, advisory controller lock.
+- OpenClaw adds a journal around both files: partial apply/rollback resumes or
+  compensates; this is recoverability, not filesystem-wide atomicity.
 - Original config bytes and mode retained; backups/receipts use `0600`.
 - Reapplying identical settings is a no-op.
 - Rollback restores the exact original or removes a file Ballz created.
@@ -211,4 +222,4 @@ See [adapter contracts](docs/ADAPTERS.md), [design and acceptance criteria](docs
 and [verification](docs/VERIFICATION.md). Discovery and base-selection receipts live
 in `docs/discovery/`. Source discovery executed no candidate code.
 
-MIT licensed. Local alpha, not a claim of universal unrestricted access.
+MIT licensed. Public alpha, not a claim of universal unrestricted access.

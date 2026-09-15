@@ -6,6 +6,31 @@ if [ "$(uname -s)" != Darwin ]; then
     exit 2
 fi
 HERE="$(cd "$(dirname "$0")" && pwd)"
+MAC_VERSION="$(/usr/bin/sw_vers -productVersion)"
+if [ "${MAC_VERSION%%.*}" -lt 11 ]; then
+    /usr/bin/osascript -e 'display dialog "Ballz2theWALL setup needs macOS 11 or newer. This Mac was not changed." with title "Ballz2theWALL" buttons {"OK"} default button "OK"'
+    exit 2
+fi
+case "$(uname -m)" in
+    arm64) ARCH=aarch64; SHA=5bb0e5fe008a773c3dbcb97ff79cd89e1241464fe9d2f986d52ad8f1b037bd62 ;;
+    x86_64) ARCH=x86_64; SHA=b3b2137477cf96c9686ebfb71524614cec780c673fd73e59bce099aef02e70e8 ;;
+    *) printf '%s\n' 'Unsupported Mac processor.' >&2; exit 2 ;;
+esac
+# Reject incomplete bundles before creating state or downloading a runtime.
+if [ -e "$HERE/payload" ]; then
+    shopt -s nullglob
+    WHEELS=("$HERE"/payload/*.whl)
+    if [ "${#WHEELS[@]}" -ne 1 ] || [ ! -f "$HERE/payload/SHA256SUMS.json" ]; then
+        printf '%s\n' 'Incomplete package. Extract the entire installer ZIP before starting.' >&2
+        exit 2
+    fi
+elif [ ! -f "$HERE/../pyproject.toml" ]; then
+    printf '%s\n' 'Missing package. Extract the entire installer ZIP before starting.' >&2
+    exit 2
+fi
+if [ "${BALLZ_NONINTERACTIVE:-0}" != 1 ]; then
+    /usr/bin/osascript -e 'display dialog "Install Ballz2theWALL for this Mac account? Setup downloads its private runtime, then guides you through Mac access approvals. No Python or Homebrew setup needed. Your agent remains OFF until you choose ON." with title "Install Ballz2theWALL" buttons {"Cancel", "Install"} default button "Install" cancel button "Cancel"' >/dev/null || exit 0
+fi
 ROOT="${BALLZ_INSTALL_ROOT:-$HOME/Library/Application Support/Ballz2theWALL}"
 umask 077
 mkdir -p "$ROOT"
@@ -19,20 +44,7 @@ failed() {
     fi
 }
 trap failed EXIT
-MAC_VERSION="$(/usr/bin/sw_vers -productVersion)"
-if [ "${MAC_VERSION%%.*}" -lt 11 ]; then
-    /usr/bin/osascript -e 'display dialog "Ballz2theWALL setup needs macOS 11 or newer. This Mac was not changed." with title "Ballz2theWALL" buttons {"OK"} default button "OK"'
-    exit 0
-fi
-if [ "${BALLZ_NONINTERACTIVE:-0}" != 1 ]; then
-    /usr/bin/osascript -e 'display dialog "Install Ballz2theWALL for this Mac account? Setup downloads its private runtime, then guides you through Mac access approvals. No Python or Homebrew setup needed. Your agent remains OFF until you choose ON." with title "Install Ballz2theWALL" buttons {"Cancel", "Install"} default button "Install" cancel button "Cancel"' >/dev/null || exit 0
-fi
 printf '%s\n' 'Installing Ballz2theWALL. Keep this window open; setup appears when ready.'
-case "$(uname -m)" in
-    arm64) ARCH=aarch64; SHA=5bb0e5fe008a773c3dbcb97ff79cd89e1241464fe9d2f986d52ad8f1b037bd62 ;;
-    x86_64) ARCH=x86_64; SHA=b3b2137477cf96c9686ebfb71524614cec780c673fd73e59bce099aef02e70e8 ;;
-    *) printf '%s\n' 'Unsupported Mac processor.' >> "$LOG"; exit 2 ;;
-esac
 mkdir -p "$ROOT/bootstrap"
 ARCHIVE="$ROOT/bootstrap/uv-$ARCH-0.12.5.tar.gz"
 if [ ! -f "$ARCHIVE" ] || [ "$(/usr/bin/shasum -a 256 "$ARCHIVE" | /usr/bin/cut -d ' ' -f 1)" != "$SHA" ]; then
@@ -54,7 +66,7 @@ if [ ! -x "$ROOT/runtime/bin/python" ]; then
 fi
 PYTHON="$ROOT/runtime/bin/python"
 if [ -d "$HERE/payload" ]; then
-    TARGET="$("$PYTHON" - "$HERE/payload" <<'PY'
+    TARGET="$("$PYTHON" -I - "$HERE/payload" <<'PY'
 import hashlib, json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 manifest = json.loads((root / 'SHA256SUMS.json').read_text())
@@ -74,21 +86,21 @@ else
     exit 2
 fi
 "$UV" pip install --no-config --python "$PYTHON" --reinstall-package ballz2thewall "$TARGET" >> "$LOG" 2>&1
-"$PYTHON" -m ballz2thewall --version >> "$LOG" 2>&1
+"$PYTHON" -I -m ballz2thewall --version >> "$LOG" 2>&1
 mkdir -p "$HOME/Applications"
 LAUNCHER="$HOME/Applications/Ballz2theWALL.command"
-"$PYTHON" - "$PYTHON" "$LAUNCHER" <<'PY'
+"$PYTHON" -I - "$PYTHON" "$LAUNCHER" <<'PY'
 import os, pathlib, shlex, sys
 python, target = sys.argv[1:]
 path = pathlib.Path(target)
 if path.is_symlink():
     raise SystemExit('Existing launcher is a symlink. Choose a regular launcher path.')
-content = '#!/bin/bash\ncd "$HOME"\nexec ' + shlex.quote(python) + ' -m ballz2thewall setup --gui\n'
+content = '#!/bin/bash\ncd "$HOME"\nexec ' + shlex.quote(python) + ' -I -m ballz2thewall setup --gui\n'
 path.write_text(content)
 os.chmod(path, 0o700)
 PY
 printf 'Installed. Open %s any time to finish setup or turn ON/OFF.\n' "$LAUNCHER"
 trap - EXIT
 if [ "${BALLZ_NO_LAUNCH:-0}" != 1 ]; then
-    exec "$PYTHON" -m ballz2thewall setup --gui
+    exec "$PYTHON" -I -m ballz2thewall setup --gui
 fi

@@ -21,7 +21,7 @@ from .config import checked_path, make_plan, parse
 from .doctor import inspect_runtime, require_runtime
 from .store import Store, atomic_write, digest
 
-LABELS = {"hermes": "Hermes", "codex": "OpenAI Codex", "claude": "Claude Code"}
+LABELS = {"hermes": "Hermes", "codex": "OpenAI Codex", "claude": "Claude Code", "openclaw": "OpenClaw"}
 SETTINGS = {
     "accessibility": "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
     "screen_recording": "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture",
@@ -75,7 +75,9 @@ OFF restores future-launch configuration, not already-running processes or TCC.
         home = home.expanduser().absolute()
         if not home.is_dir():
             raise ValueError("Agent home is missing. Finish the agent's own setup first.")
-        require_runtime(adapter, home)
+        report = require_runtime(adapter, home)
+        if adapter.name == "openclaw":
+            return self._enable_openclaw(home, report["executable"])
         with Store(self.root).lock():
             old = self.status()
             plan = make_plan(adapter, home)
@@ -96,6 +98,50 @@ OFF restores future-launch configuration, not already-running processes or TCC.
             self._save(record)
             return record
 
+    def _enable_openclaw(self, home: Path, executable: str) -> dict:
+        from .openclaw import OpenClawStore, make_plans
+        from .openclaw_runtime import apply_verified, verify_native
+        with Store(self.root).lock():
+            old = self.status()
+            plans = make_plans(home)
+            if old["phase"] != "off":
+                if old["phase"] == "on" and old["adapter"] == "openclaw" and old["home"] == str(home):
+                    store = OpenClawStore(self.root / "activations" / old["id"])
+                    store.validate(old["receipt_id"], home)
+                    if any(p.before != p.after for p in plans):
+                        raise ValueError("OpenClaw config drift detected; turn OFF before retrying")
+                    verify_native(home, executable)
+                    return old
+                raise ValueError("Turn OFF the existing activation before choosing another agent.")
+            if all(p.before == p.after for p in plans):
+                raise ValueError("OpenClaw already uses these settings; no baseline exists for OFF to restore")
+            record = {"schema": 1, "id": uuid.uuid4().hex, "phase": "enabling",
+                      "adapter": "openclaw", "home": str(home), "after_sha256": digest(plans[0].after)}
+            self._save(record)
+            store = OpenClawStore(self.root / "activations" / record["id"])
+            result = apply_verified(store, plans, home, executable)
+            record.update(phase="on", receipt_id=result["receipt_id"])
+            self._save(record)
+            return record
+
+    def _disable_openclaw(self, record: dict, tx: Path) -> dict:
+        from .openclaw import OpenClawStore
+        store = OpenClawStore(tx)
+        receipts = list(tx.glob("*.bundle.json"))
+        if len(receipts) > 1 or (record.get("receipt_id") and not receipts):
+            raise ValueError("OpenClaw activation bundle missing or ambiguous")
+        for receipt in receipts:
+            receipt_id = receipt.name.removesuffix(".bundle.json")
+            metadata = store._load(receipt_id)
+            if (metadata["home"] != str(Path(record["home"]).resolve())
+                    or metadata["files"][0]["after_sha256"] != record["after_sha256"]
+                    or (record.get("receipt_id") and record["receipt_id"] != receipt_id)):
+                raise ValueError("Invalid OpenClaw activation receipt scope")
+            store.rollback(receipt_id)
+        record["phase"] = "off"
+        self._save(record)
+        return record
+
     def disable(self) -> dict:
         with Store(self.root).lock():
             record = self.status()
@@ -104,6 +150,8 @@ OFF restores future-launch configuration, not already-running processes or TCC.
             record["phase"] = "stopping"
             self._save(record)
             tx = self.root / "activations" / record["id"]
+            if record["adapter"] == "openclaw":
+                return self._disable_openclaw(record, tx)
             receipts = list(tx.glob("*.json"))
             if len(receipts) > 1:
                 raise ValueError("Invalid activation: multiple transaction receipts")
@@ -125,7 +173,7 @@ def discover_agents() -> list[dict]:
     """Discover config paths only; never load auth files or select every profile."""
     results = []
     for name, adapter in ADAPTERS.items():
-        default = Path.home() / {"hermes": ".hermes", "codex": ".codex", "claude": ".claude"}[name]
+        default = Path.home() / {"hermes": ".hermes", "codex": ".codex", "claude": ".claude", "openclaw": ".openclaw"}[name]
         configured = os.environ.get(adapter.home_env)
         root = Path(configured).expanduser().absolute() if configured else default
         homes = [root]
@@ -139,7 +187,7 @@ def discover_agents() -> list[dict]:
             report = inspect_runtime(adapter, home)
             if report["status"] != "ready":
                 continue
-            label = LABELS[name] + (f" — {home.name}" if home.parent.name == "profiles" else " — default")
+            label = LABELS[name] + (f" — {home.name}" if home.parent.name == "profiles" or name == "openclaw" else " — default")
             results.append({"adapter": name, "home": str(home), "label": label, **report})
     return results
 

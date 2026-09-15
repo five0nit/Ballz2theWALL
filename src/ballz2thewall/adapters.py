@@ -39,6 +39,8 @@ class Adapter:
             if inherit_secrets:
                 result["shell_environment_policy.ignore_default_excludes"] = True
             return result
+        if self.name == "openclaw":
+            return {}  # Two native files are planned together by openclaw.make_plans.
         return {"permissions.defaultMode": "bypassPermissions", "sandbox.enabled": False}
 
     def scope_args(self, home: Path | None) -> list[str]:
@@ -59,6 +61,10 @@ class Adapter:
             args = [self.executable, *self.scope_args(home), "chat", self.flag]
             if not interactive:
                 args += ["--oneshot", "--query-file", "-"]
+        elif self.name == "openclaw":
+            if model:
+                raise ValueError("OpenClaw uses its existing configured model; --model is unsupported")
+            args = [self.executable, "agent", "--local"]
         elif self.name == "codex":
             args = [self.executable] + ([] if interactive else ["exec"])
             args += [self.flag, "-c", 'shell_environment_policy.inherit="all"']
@@ -83,10 +89,17 @@ class Adapter:
             result.update({"TERMINAL_ENV": "local", "HERMES_YOLO_MODE": "1"})
             if cdp:
                 result["BROWSER_CDP_URL"] = cdp
+        if self.name == "openclaw":
+            result.update({"OPENCLAW_HOME": str(home.parent),
+                           "OPENCLAW_CONFIG_PATH": str(home / "openclaw.json"),
+                           "OPENCLAW_OAUTH_DIR": str(home / "credentials"),
+                           "OPENCLAW_AGENT_DIR": "", "PI_CODING_AGENT_DIR": "",
+                           "OPENCLAW_PROFILE": ""})
         return result
 
 
 ADAPTERS = {
+    "openclaw": Adapter("openclaw", "openclaw", "OPENCLAW_STATE_DIR", "openclaw.json", "--local", "2026.6.1"),
     "hermes": Adapter("hermes", "hermes", "HERMES_HOME", "config.yaml", "--yolo", "0.21.1"),
     "codex": Adapter("codex", "codex", "CODEX_HOME", "config.toml",
                      "--dangerously-bypass-approvals-and-sandbox", "0.152.0"),
@@ -100,4 +113,4 @@ def get_adapter(name: str) -> Adapter:
     try:
         return ADAPTERS[ALIASES.get(name, name)]
     except KeyError:
-        raise ValueError("Unknown adapter; choose hermes, codex/openai or claude/anthropic") from None
+        raise ValueError("Unknown adapter; choose hermes, openclaw, codex/openai or claude/anthropic") from None

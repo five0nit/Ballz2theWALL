@@ -11,6 +11,9 @@ from .adapters import Adapter
 
 
 def inspect_runtime(adapter: Adapter, home: Path | None = None) -> dict:
+    if adapter.name == "openclaw":
+        from .openclaw_runtime import inspect_native
+        return inspect_native(adapter, home)
     exe = shutil.which(adapter.executable)
     result = {"adapter": adapter.name, "executable": exe, "version": None,
               "tested_version": adapter.tested_version, "native_flag": adapter.flag,

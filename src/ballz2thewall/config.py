@@ -115,6 +115,8 @@ class Plan:
 
 def make_plan(adapter: Adapter, home: Path, cdp: str | None = None,
               inherit_secrets: bool = False) -> Plan:
+    if adapter.name == "openclaw":
+        raise ValueError("OpenClaw requires make_plans and OpenClawStore for both native files")
     target = checked_path(home / adapter.filename)
     before = target.read_bytes() if target.exists() else None
     data = parse(before or b"", adapter.filename)

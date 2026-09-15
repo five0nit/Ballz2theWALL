@@ -1,0 +1,127 @@
+{
+  "version": "0.2.0a2",
+  "scope": "unsigned alpha; no authenticated model/desktop/macOS hardware acceptance",
+  "source": {
+    "tests": 538,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 535
+  },
+  "fresh_wheel": {
+    "tests": 538,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 535
+  },
+  "windows_install_reinstall_source_fallback": {
+    "tests": 11,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 11
+  },
+  "windows_installed_wheel_core_store": {
+    "tests": 36,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "passed": 35
+  },
+  "openclaw_native": {
+    "runtime": "2026.6.1",
+    "cases": [
+      "native_flag_detection",
+      "multi_scope_ON",
+      "native_effective_policy",
+      "idempotent_ON",
+      "restrictive_host_negative",
+      "exact_byte_OFF",
+      "idempotent_OFF",
+      "native_schema_negative",
+      "named_profile_rejected",
+      "ambient_home_override_pinned"
+    ],
+    "verification": {
+      "native_config_valid": true,
+      "effective_scopes": 2,
+      "host": "gateway",
+      "security": "full",
+      "ask": "off"
+    },
+    "before_sha256": [
+      "e83c2d2892f54220b09023a1ce3786b314e38d9e328ee0ef3fe1f89cc72c248e",
+      "21c192e783bf0e408cb26346fe3be29b4cc99eaaefd17fa342575aadafe1d3e3"
+    ],
+    "model_calls": 0,
+    "real_profile_changes": 0,
+    "gateway_restarts": 0,
+    "native_executable_detected": true
+  },
+  "browser": {
+    "url": "http://127.0.0.1:8847/",
+    "cases": [
+      {
+        "name": "1440-reduce0-js1",
+        "geometry": {
+          "width": 1440,
+          "scroll": 1440
+        },
+        "console_errors": [],
+        "preview": "on/off+keyboard",
+        "screenshot": "1440-reduce0-js1.png"
+      },
+      {
+        "name": "390-reduce0-js1",
+        "geometry": {
+          "width": 390,
+          "scroll": 390
+        },
+        "console_errors": [],
+        "preview": "on/off+keyboard",
+        "screenshot": "390-reduce0-js1.png"
+      },
+      {
+        "name": "320-reduce1-js1",
+        "geometry": {
+          "width": 320,
+          "scroll": 320
+        },
+        "console_errors": [],
+        "preview": "on/off+keyboard",
+        "screenshot": "320-reduce1-js1.png"
+      },
+      {
+        "name": "390-reduce1-js0",
+        "geometry": {
+          "width": 390,
+          "scroll": 390
+        },
+        "console_errors": [],
+        "preview": "disabled fallback",
+        "screenshot": "390-reduce1-js0.png"
+      }
+    ],
+    "passed": 4
+  },
+  "shortcut": {
+    "status": "passed",
+    "scope": "native COM; scratch Programs override",
+    "arguments": "-I -m ballz2thewall setup --gui",
+    "installer_sha256": "6d75d83fce113559ffabe639e120f8b6977e9fdf1806069a8c7c9137eacd0044"
+  },
+  "reviews": {
+    "spec": "PASS; explicit per-agent runtime overrides rejected",
+    "quality": "APPROVED; independent 77-test run"
+  },
+  "secret_scan_history": "3 commits scanned; zero findings after three reviewed historical false-positive fingerprints",
+  "wheel_sha256": "4a23664b7b5be26ff52c32c3a5f74496bcd31ba5daed87c8849fdf1723a1c830",
+  "unverified": [
+    "Real Mac installation/TCC attribution",
+    "Windows ARM64",
+    "Authenticated model execution",
+    "Universal desktop companion",
+    "Code signing/notarization"
+  ]
+}

@@ -1,9 +1,9 @@
 ---
 name: ballz2thewall
-description: Use when enabling native full-access agent runtimes. Configure Hermes, OpenAI Codex and Anthropic Claude Code with explicit homes, credential references and reversible receipts.
+description: Use when enabling native full-access agent runtimes. Configure Hermes, OpenAI Codex, Anthropic Claude Code and local OpenClaw with explicit homes, credential references and reversible receipts.
 license: MIT
 metadata:
-  version: 0.2.0a1
+  version: 0.2.0a2
   platforms: [linux, macos, windows, wsl]
 ---
 
@@ -60,6 +60,17 @@ The user completes OS approvals and the agent's own sign-in personally.
 
 Use `codex`/`openai` for OpenAI Codex and `claude`/`anthropic` for Claude Code.
 These are runtime adapters, not SDK permission switches for remote model APIs.
+
+## OpenClaw
+
+Use `ballz on openclaw --home "$HOME/.openclaw"`, then `ballz run openclaw
+--home "$HOME/.openclaw" --cwd "$PWD" --interactive`. ON validates native schema
+and host policy; OFF restores config and approvals. Linux/WSL/macOS only;
+default `.openclaw` layout, no named profiles or remote nodes/gateways. Run
+requires prior ON/apply. The thin terminal prompt loop forwards each message
+to native `agent --local` with one session ID; no daemon is started. Native
+OpenClaw takes prompt text in `--message`, so it appears in child argv; dry-run
+redacts it. Configured OpenClaw workspace rules remain native. No browser adapter.
 
 ## Browser and credentials
 
