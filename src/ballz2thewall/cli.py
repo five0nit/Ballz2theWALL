@@ -11,6 +11,7 @@ from pathlib import Path
 
 from . import __version__
 from .adapters import ADAPTERS, ALIASES, get_adapter
+from .admin import AdminError
 from .config import Plan, checked_path, make_plan, parse
 from .doctor import inspect_runtime, require_runtime
 from .store import Store
@@ -40,7 +41,7 @@ def parser() -> argparse.ArgumentParser:
         sub.add_argument("--home", required=True, type=Path, help="Exact native runtime home")
         sub.add_argument("--cdp", help="Hermes: explicit existing HTTP(S) Chrome debugging endpoint")
         sub.add_argument("--inherit-secrets", action="store_true", help="Codex: include secret-named inherited env vars")
-        if name == "apply":
+        if name in {"apply", "run"}:
             sub.add_argument("--state-dir", type=Path, default=state_root())
         if name == "run":
             sub.add_argument("--cwd", required=True, type=Path)
@@ -71,7 +72,61 @@ def parser() -> argparse.ArgumentParser:
     for action in ("off", "status"):
         sub = commands.add_parser(action)
         sub.add_argument("--state-dir", type=Path, default=state_root())
+    machine = commands.add_parser("machine", help="Owned machine tools, desktop bridge and approved administration")
+    machine.add_argument("action", choices=["check", "serve", "tool", "tools", "admin-on", "admin-off", "admin-status"])
+    machine.add_argument("--state-dir", type=Path, default=state_root())
+    machine.add_argument("--activation-id")
+    machine.add_argument("--tool")
+    machine.add_argument("--arguments", default="{}", help="JSON object for one tool call")
+    machine.add_argument("--no-desktop", action="store_true", help="Serve shell/files only on headless hosts")
     return p
+
+
+def machine_command(args) -> int:
+    import asyncio
+
+    from . import admin, machine
+    from .onboarding import Activation
+    if args.action == "check":
+        from .machine_check import inspect_machine
+        report = inspect_machine()
+        output(report)
+        return 0 if report["status"] == "ready" else 2
+    if args.action == "admin-status":
+        output(admin.status(args.state_dir))
+        return 0
+    if args.action == "admin-off":
+        result = admin.disable(args.state_dir)
+        output(result)
+        return 2 if result.get("error") or result.get("status") != "off" else 0
+    identity = args.activation_id or Activation(args.state_dir).status().get("id")
+    machine.require_on(args.state_dir, identity)
+    if args.action == "admin-on":
+        result = admin.enable(args.state_dir)
+        output(result)
+        return 0 if result.get("status") == "ready" and result.get("elevated") is True else 2
+    if args.action == "serve":
+        asyncio.run(machine.serve(args.state_dir, identity, desktop=not args.no_desktop))
+        return 0
+    if args.action == "tools":
+        output({"tools": [t.model_dump(mode="json") for t in machine.local_tools()],
+                "desktop": asyncio.run(machine.driver_call(args.state_dir, identity, None, {}))})
+        return 0
+    if not args.tool:
+        raise ValueError("machine tool requires --tool")
+    try:
+        arguments = json.loads(args.arguments)
+    except (ValueError, TypeError):
+        raise ValueError("--arguments must be valid JSON") from None
+    if not isinstance(arguments, dict):
+        raise ValueError("--arguments must be a JSON object")
+    if args.tool.startswith("desktop_"):
+        result = asyncio.run(machine.driver_call(args.state_dir, identity, args.tool, arguments))
+    else:
+        result = machine.call_local(args.state_dir, identity, args.tool, arguments)
+    output(result)
+    return 2 if (result.get("isError") or result.get("error") or result.get("timed_out")
+                 or result.get("cancelled") or result.get("revoked") or result.get("returncode", 0) != 0) else 0
 
 
 def run(args, adapter, home: Path, cdp: str | None) -> int:
@@ -87,6 +142,18 @@ def run(args, adapter, home: Path, cdp: str | None) -> int:
     argv = adapter.argv(interactive=args.interactive, model=args.model, chrome=args.chrome,
                         inherit_secrets=args.inherit_secrets, home=home)
     env_updates = adapter.environment(home, cdp)
+    if adapter.name == "claude":
+        from .machine import require_on
+        from .machine_bindings import claude_config
+        from .onboarding import Activation
+        active = Activation(args.state_dir).status()
+        if (active.get("phase") == "on" and active.get("machine_access") is True
+                and active.get("adapter") == "claude" and active.get("home") == str(home)):
+            require_on(args.state_dir, active["id"])
+            spec = claude_config(args.state_dir, active["id"])
+            # Terminate variadic --mcp-config with a known native option, not
+            # a prompt/config filename. Preserve other installed MCP servers.
+            argv = [argv[0], "--mcp-config", json.dumps(spec), *argv[1:]]
     cwd = args.cwd.expanduser().absolute()
     if not cwd.is_dir():
         raise ValueError("--cwd must be an existing directory")
@@ -147,6 +214,8 @@ def report_error(args, message: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     try:
+        if args.command == "machine":
+            return machine_command(args)
         if args.command in {"setup", "on", "off", "status"}:
             from .onboarding import Activation, augment_path, check_setup, wizard
             augment_path()
@@ -157,7 +226,9 @@ def main(argv: list[str] | None = None) -> int:
                 return wizard(args.state_dir)
             control = Activation(args.state_dir)
             if args.command == "on":
-                output(control.enable(args.adapter, args.home))
+                from .machine_check import require_ready
+                require_ready()
+                output(control.enable(args.adapter, args.home, machine_access=True))
             elif args.command == "off":
                 output(control.disable())
             else:
@@ -215,7 +286,7 @@ def main(argv: list[str] | None = None) -> int:
             require_runtime(adapter, home)
             output(Store(args.state_dir).apply(plan))
         return 0
-    except ValueError as exc:
+    except (ValueError, AdminError) as exc:
         report_error(args, str(exc))
         return 2
     except (OSError, UnicodeError, subprocess.SubprocessError):

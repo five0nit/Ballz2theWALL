@@ -87,6 +87,36 @@ else
 fi
 "$UV" pip install --no-config --python "$PYTHON" --reinstall-package ballz2thewall "$TARGET" >> "$LOG" 2>&1
 "$PYTHON" -I -m ballz2thewall --version >> "$LOG" 2>&1
+# This gate checks dependencies and --version only, not live Mac TCC grants.
+MACHINE_RUNTIME_JSON="$("$PYTHON" -I -m ballz2thewall machine check 2>> "$LOG")"
+"$PYTHON" -I - "$MACHINE_RUNTIME_JSON" >> "$LOG" 2>&1 <<'MACHINE_CHECK_PY'
+import json, sys
+try:
+    evidence = json.loads(sys.argv[1])
+    if not isinstance(evidence, dict):
+        raise ValueError("Expected an object")
+    if (type(evidence.get("schema")) is not int or evidence["schema"] != 1
+            or evidence.get("status") != "ready"
+            or not isinstance(evidence.get("packages"), dict)
+            or not isinstance(evidence.get("desktop_driver"), dict)
+            or evidence.get("errors") != []
+            or evidence.get("scope") != "dependencies_and_native_executable_only"
+            or evidence.get("live_permissions") != "not_tested"):
+        raise ValueError("Invalid or non-ready evidence")
+    for name, pin in {"cua-driver": "0.28.1", "mcp": "1.30.0"}.items():
+        item = evidence["packages"].get(name)
+        if (not isinstance(item, dict) or item.get("installed") != pin
+                or item.get("expected") != pin or item.get("importable") is not True):
+            raise ValueError("Invalid package evidence: " + name)
+    driver = evidence["desktop_driver"]
+    if (not isinstance(driver.get("command"), str) or not driver["command"].strip()
+            or not isinstance(driver.get("version"), str)
+            or driver["version"] != "cua-driver 0.28.1" or driver.get("status") != "ready"):
+        raise ValueError("Native executable is not ready")
+except (ValueError, KeyError, IndexError, TypeError) as error:
+    raise SystemExit("Machine runtime check failed: " + str(error))
+print(json.dumps(evidence))
+MACHINE_CHECK_PY
 mkdir -p "$HOME/Applications"
 LAUNCHER="$HOME/Applications/Ballz2theWALL.command"
 "$PYTHON" -I - "$PYTHON" "$LAUNCHER" <<'PY'

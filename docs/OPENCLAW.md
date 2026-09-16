@@ -1,9 +1,13 @@
-# OpenClaw adapter — 0.2.0a2
+# OpenClaw adapter — 0.3.0a0.dev6 source
+
+Published v0.2.0a2 downloads have the native policy adapter only. Current source
+also registers managed machine MCP; native validation and final authenticated
+acceptance remain distinct. [Current evidence](VERIFICATION.md).
 
 ## Supported contract
 
 An already-installed, authenticated OpenClaw CLI on Linux, WSL, or macOS.
-First native acceptance: **OpenClaw 2026.6.1**. Native Windows is rejected;
+Native policy contract target: **OpenClaw 2026.6.1**. Native Windows is rejected;
 install Ballz inside WSL to operate a WSL OpenClaw installation. The native
 Windows setup does not cross into WSL. macOS source compatibility is implemented;
 physical Mac acceptance is still pending.
@@ -18,15 +22,20 @@ home and verifies the exact native approval path. No symlink workaround.
 ballz plan openclaw --home "$HOME/.openclaw"
 ballz on openclaw --home "$HOME/.openclaw"
 ballz run openclaw --home "$HOME/.openclaw" --cwd "$PWD" --interactive
-# Close the agent first:
+# Revoke Ballz access and restore configuration:
 ballz off
 ```
 
-`apply`/`rollback RECEIPT_ID` also work for explicit non-managed transactions.
-`run` itself never persists settings and requires an already-applied ON policy.
+`apply`/`rollback RECEIPT_ID` also work for explicit runtime-settings transactions,
+without machine activation. `run` never persists settings and requires an
+already-applied native policy; it does not turn machine access ON.
 
 ## What changes
 
+- Dev6 ON registers `mcp.servers.ballz2thewall_machine`, using the selected Python,
+  state directory and activation ID. Existing namesake registrations are rejected.
+  Schema/effective-policy validation remains required; registration is not proof
+  of an authenticated model or tool call.
 - `openclaw.json` (JSON5 input, strict JSON output): full tool profile and wildcard
   allow, configured tool deny list cleared, local host `gateway`, full exec mode,
   sandbox off, filesystem/apply-patch workspace-only restrictions off.
@@ -37,6 +46,12 @@ ballz off
 - Model providers, channel definitions and existing authentication remain native;
   Ballz does not read OAuth stores or copy credentials. JSON formatting/comments
   can change on ON. OFF restores exact original bytes or original absence.
+
+Dev6 OFF also revokes managed access before restoration. Connected servers close;
+owned commands receive asynchronous cancellation. This does not undo completed
+work, stop unrelated tools, revoke OS permissions or guarantee cleanup of detached
+descendants. Close the agent to stop its session. Driver tools act on the runtime
+host; WSL does not acquire native Windows desktop control automatically.
 
 Remote execution hosts, included/external config fragments, provider-specific
 policy maps and unsupported per-agent runtime forms are rejected, not flattened.

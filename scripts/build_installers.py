@@ -8,6 +8,7 @@ import io
 import json
 import stat
 import zipfile
+from email.parser import BytesParser
 from pathlib import Path
 
 
@@ -21,9 +22,20 @@ def build(wheel: Path, output: Path) -> list[dict]:
     with zipfile.ZipFile(io.BytesIO(wheel_bytes)) as package:
         if package.testzip() is not None:
             raise ValueError("Wheel failed ZIP integrity validation")
-        for required in ("ballz2thewall/native/dialog.ps1", "ballz2thewall/native/dialog.js", "ballz2thewall/onboarding.py"):
-            if required not in package.namelist():
+        for name in ("native/dialog.ps1", "native/dialog.js", "onboarding.py",
+                     "machine.py", "machine_jobs.py", "admin.py", "admin_jobs.py", "wire_json.py",
+                     "machine_bindings.py", "machine_check.py"):
+            required = "ballz2thewall/" + name
+            if required not in package.namelist() or not package.read(required).strip():
                 raise ValueError(f"Wheel missing required setup component: {required}")
+        metadata_path = f"ballz2thewall-{wheel.name.split('-')[1]}.dist-info/METADATA"
+        if metadata_path not in package.namelist():
+            raise ValueError("Wheel dependency metadata is missing")
+        metadata = BytesParser().parsebytes(package.read(metadata_path))
+        dependencies = ["".join(value.lower().split()) for value in metadata.get_all("Requires-Dist", [])]
+        for pin in ("cua-driver==0.28.1", "mcp==1.30.0"):
+            if pin not in dependencies:
+                raise ValueError(f"Wheel missing unconditional pinned dependency: {pin}")
     version = wheel.name.split("-")[1]
     checksum = hashlib.sha256(wheel_bytes).hexdigest()
     output.mkdir(parents=True, exist_ok=True)
@@ -39,16 +51,20 @@ def build(wheel: Path, output: Path) -> list[dict]:
             f"Ballz2theWALL {version} - {platform} local alpha\n\n"
             f"1. Extract the entire ZIP.\n2. Double-click {launcher}.\n"
             "3. Follow setup. Approve requested OS prompts/settings yourself.\n"
-            "4. Choose Turn ON when ready.\n\n"
-            "Python installs privately and automatically. Internet access required on first install.\n"
+            "4. Connect your existing agent, choose Turn ON, then Start agent.\n\n"
+            "Private Python and machine dependencies install automatically. Internet access required on first install.\n"
+            "Setup checks dependencies and the native executable; live permissions are not tested by that check.\n"
             "An installed Hermes, OpenAI Codex, Claude Code or supported OpenClaw agent is required; it handles its own sign-in.\n"
             "OpenClaw requires Linux/WSL or Mac and a standard .openclaw home; native Windows is not supported.\n"
             "One agent found: selected automatically. Multiple profiles: choose one.\n"
             "Windows: reopen Ballz2theWALL from Start. Mac: Applications in your home folder, Ballz2theWALL.command.\n"
-            "Close your agent window before turning OFF. OFF restores previous runtime settings; it does not stop\n"
-            "existing processes, undo completed work or revoke OS permissions.\n\n"
+            "Close your agent window before turning OFF. OFF disconnects Ballz tools and restores previous\n"
+            "configuration. It cancels managed in-flight operations, but does not stop unrelated processes,\n"
+            "undo completed actions, revoke OS grants or disable unrelated tools. Windows UAC approval\n"
+            "is separate from ordinary account access.\n\n"
             "This alpha installer is unsigned and not notarized. If your OS blocks it, do not expect the\n"
             "script to override that policy. Administrator and Mac privacy approvals remain yours.\n"
+            "Mac support is experimental: real TCC approval and machine control remain unverified.\n"
             "Mac: enable Terminal in Accessibility, Screen Recording and Full Disk Access. Finder Automation\n"
             "is requested separately. Other apps ask when used. Grants cover these Terminal launches, not\n"
             "unrelated background agents. Native Mac permission acceptance is still pending.\n"

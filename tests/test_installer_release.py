@@ -15,12 +15,23 @@ builder = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(builder)
 
 
-def make_wheel(tmp_path, missing=None):
-    wheel = tmp_path / "ballz2thewall-0.2.0a2-py3-none-any.whl"
+COMPONENTS = ("native/dialog.ps1", "native/dialog.js", "onboarding.py",
+              "machine.py", "machine_jobs.py", "admin.py", "admin_jobs.py", "wire_json.py",
+              "machine_bindings.py", "machine_check.py")
+
+
+def make_wheel(tmp_path, missing=None, dependencies=None):
+    wheel = tmp_path / "ballz2thewall-0.3.0a0.dev1-py3-none-any.whl"
     with zipfile.ZipFile(wheel, "w") as package:
-        for name in ("native/dialog.ps1", "native/dialog.js", "onboarding.py"):
+        for name in COMPONENTS:
             if name != missing:
-                package.writestr("ballz2thewall/" + name, "fixture")
+                package.writestr("ballz2thewall/" + name, "# isolated release fixture\n")
+        dependencies = dependencies if dependencies is not None else ["cua-driver==0.28.1", "mcp==1.30.0"]
+        package.writestr(
+            "ballz2thewall-0.3.0a0.dev1.dist-info/METADATA",
+            "Metadata-Version: 2.3\nName: ballz2thewall\nVersion: 0.3.0a0.dev1\n"
+            + "".join(f"Requires-Dist: {dep}\n" for dep in dependencies) + "\n",
+        )
     return wheel
 
 
@@ -62,12 +73,30 @@ def test_bundles_snapshot_wheel_once(tmp_path, monkeypatch):
                 assert archive.read("windows/install.ps1") == (ROOT / "installers/windows/install.ps1").read_bytes()
 
 
-@pytest.mark.parametrize("missing", ["native/dialog.ps1", "native/dialog.js", "onboarding.py"])
+@pytest.mark.parametrize("missing", COMPONENTS)
 def test_missing_setup_component_blocks_release(tmp_path, missing):
     wheel = make_wheel(tmp_path, missing)
     with pytest.raises(ValueError, match="required setup component"):
         builder.build(wheel, tmp_path / "release")
     assert not (tmp_path / "release").exists()
+
+
+@pytest.mark.parametrize("dependencies", [[], ["cua-driver==0.28.1"], ["mcp==1.30.0"],
+    ["cua-driver>=0.28.1", "mcp==1.30.0"], ["cua-driver==0.28.1", "mcp==1.29.0"],
+    ['cua-driver==0.28.1; extra == "machine"', "mcp==1.30.0"]])
+def test_machine_dependencies_must_be_unconditional_pins(tmp_path, dependencies):
+    with pytest.raises(ValueError, match="dependency"):
+        builder.build(make_wheel(tmp_path, dependencies=dependencies), tmp_path / "release")
+    assert not (tmp_path / "release").exists()
+
+
+def test_consumer_instructions(tmp_path):
+    for result in builder.build(make_wheel(tmp_path), tmp_path / "release"):
+        with zipfile.ZipFile(result["path"]) as archive:
+            text = archive.read("START-HERE.txt").decode()
+        for phrase in ("machine dependencies install automatically", "Start agent", "OFF disconnects",
+                       "unrelated tools", "cancels managed in-flight operations", "experimental", "not tested"):
+            assert phrase in text
 
 
 def test_wrong_distribution_blocks_release(tmp_path):

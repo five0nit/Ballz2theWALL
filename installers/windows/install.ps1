@@ -53,6 +53,34 @@ function Save-SetupShortcut([string]$Python, [string]$ShortcutPath, [string]$Wor
     } finally { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null }
 }
 
+function ConvertFrom-MachineRuntime([string]$Json) {
+    try {
+        if ([string]::IsNullOrWhiteSpace($Json) -or -not $Json.TrimStart().StartsWith('{')) { throw 'Expected a JSON object.' }
+        $evidence = ConvertFrom-Json -InputObject $Json
+        if ($evidence -isnot [pscustomobject] -or $evidence.schema -is [bool] -or
+            $evidence.schema -is [string] -or $evidence.schema -ne 1 -or
+            $evidence.status -cne 'ready' -or
+            $evidence.packages -isnot [pscustomobject] -or
+            $evidence.desktop_driver -isnot [pscustomobject] -or
+            $evidence.errors -isnot [array] -or $evidence.errors.Count -ne 0 -or
+            $evidence.scope -cne 'dependencies_and_native_executable_only' -or
+            $evidence.live_permissions -cne 'not_tested') { throw 'Invalid or non-ready evidence.' }
+        $pins = @{ 'cua-driver' = '0.28.1'; 'mcp' = '1.30.0' }
+        foreach ($name in $pins.Keys) {
+            $item = $evidence.packages.$name
+            if ($item -isnot [pscustomobject] -or $item.expected -cne $pins[$name] -or
+                $item.installed -cne $pins[$name] -or $item.importable -isnot [bool] -or
+                $item.importable -ne $true) { throw "Invalid package evidence: $name" }
+        }
+        if ($evidence.desktop_driver.command -isnot [string] -or
+            [string]::IsNullOrWhiteSpace($evidence.desktop_driver.command) -or
+            $evidence.desktop_driver.version -isnot [string] -or
+            $evidence.desktop_driver.version -cne 'cua-driver 0.28.1' -or
+            $evidence.desktop_driver.status -cne 'ready') { throw 'Native executable is not ready.' }
+        return $evidence
+    } catch { throw "Machine runtime check failed: $($_.Exception.Message)" }
+}
+
 function Invoke-Checked([string]$Executable, [string[]]$Arguments) {
     $info = New-Object Diagnostics.ProcessStartInfo
     $info.FileName = $Executable
@@ -214,6 +242,9 @@ Install location: $InstallRoot
     Invoke-Checked $uv @('pip', 'install', '--no-config', '--python', $python, '--reinstall-package', 'ballz2thewall', $package) | Out-Null
     $version = Invoke-Checked $python @('-I', '-m', 'ballz2thewall', '--version')
     if ($version -notmatch '^Ballz2theWALL ') { throw 'The installed application did not pass its version check.' }
+    Update-Status 'Checking machine dependencies and native executable (no permission requests)...'
+    $machineRuntimeJson = Invoke-Checked $python @('-I', '-m', 'ballz2thewall', 'machine', 'check')
+    $machineRuntime = ConvertFrom-MachineRuntime $machineRuntimeJson
     $shortcutPath = $null
     if (-not $NoShortcut) {
         Update-Status 'Creating your Start Menu setup shortcut...'
@@ -226,11 +257,13 @@ Install location: $InstallRoot
         status = 'installed'; application = $version; install_root = $InstallRoot; python = $python
         uv_version = $uvVersion; uv_archive_sha256 = $expectedHash; package = $package; package_sha256 = $packageHash
         shortcut = $shortcutPath; profiles_changed = $false; log = $script:LogPath
+        machine_runtime = $machineRuntime
         installed_at = [DateTime]::UtcNow.ToString('o')
     }
-    $receipt | ConvertTo-Json | Set-Content -LiteralPath $receiptPath -Encoding UTF8
+    $receipt | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $receiptPath -Encoding UTF8
     $verifiedReceipt = Get-Content -LiteralPath $receiptPath -Raw | ConvertFrom-Json
     if ($verifiedReceipt.python -ne $python -or $verifiedReceipt.status -ne 'installed') { throw 'Installation receipt verification failed.' }
+    ConvertFrom-MachineRuntime ($verifiedReceipt.machine_runtime | ConvertTo-Json -Depth 8) | Out-Null
     Update-Status "Installed $version. Receipt: $receiptPath"
     if ($script:Window) { $script:Window.Close(); $script:Window.Dispose(); $script:Window = $null; $script:StatusLabel = $null }
     if (-not $NoLaunch) {

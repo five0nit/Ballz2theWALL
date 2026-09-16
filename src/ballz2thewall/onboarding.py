@@ -70,27 +70,33 @@ OFF restores future-launch configuration, not already-running processes or TCC.
     def _save(self, record: dict) -> None:
         atomic_write(self.path, (json.dumps(record, indent=2) + "\n").encode())
 
-    def enable(self, name: str, home: Path) -> dict:
+    def enable(self, name: str, home: Path, *, machine_access: bool = False) -> dict:
         adapter = get_adapter(name)
         home = home.expanduser().absolute()
         if not home.is_dir():
             raise ValueError("Agent home is missing. Finish the agent's own setup first.")
         report = require_runtime(adapter, home)
         if adapter.name == "openclaw":
-            return self._enable_openclaw(home, report["executable"])
+            return self._enable_openclaw(home, report["executable"], machine_access=machine_access)
         with Store(self.root).lock():
             old = self.status()
             plan = make_plan(adapter, home)
             if old["phase"] != "off":
                 if old["phase"] == "on" and old["adapter"] == adapter.name and old["home"] == str(home):
+                    if machine_access and old.get("machine_access") is not True:
+                        raise ValueError("Turn OFF the runtime-only activation before enabling machine access")
                     if digest(plan.before) != old.get("after_sha256") or plan.before != plan.after:
                         raise ValueError("Agent config drift detected. Turn OFF and resolve newer edits first.")
                     return old
                 raise ValueError("Turn OFF the existing activation before choosing another agent.")
+            identity = uuid.uuid4().hex
+            if machine_access:
+                from .machine_bindings import augment_plan
+                plan = augment_plan(plan, self.root.parent, identity)
             if plan.before == plan.after:
                 raise ValueError("This agent already uses these full-access settings outside Ballz. "
                                  "No normal-settings baseline exists for OFF to restore.")
-            record = {"schema": 1, "id": uuid.uuid4().hex, "phase": "enabling",
+            record = {"schema": 1, "id": identity, "phase": "enabling", "machine_access": machine_access,
                       "adapter": adapter.name, "home": str(home), "after_sha256": digest(plan.after)}
             self._save(record)
             result = Store(self.root / "activations" / record["id"]).apply(plan)
@@ -98,7 +104,7 @@ OFF restores future-launch configuration, not already-running processes or TCC.
             self._save(record)
             return record
 
-    def _enable_openclaw(self, home: Path, executable: str) -> dict:
+    def _enable_openclaw(self, home: Path, executable: str, *, machine_access: bool = False) -> dict:
         from .openclaw import OpenClawStore, make_plans
         from .openclaw_runtime import apply_verified, verify_native
         with Store(self.root).lock():
@@ -106,6 +112,8 @@ OFF restores future-launch configuration, not already-running processes or TCC.
             plans = make_plans(home)
             if old["phase"] != "off":
                 if old["phase"] == "on" and old["adapter"] == "openclaw" and old["home"] == str(home):
+                    if machine_access and old.get("machine_access") is not True:
+                        raise ValueError("Turn OFF the runtime-only activation before enabling machine access")
                     store = OpenClawStore(self.root / "activations" / old["id"])
                     store.validate(old["receipt_id"], home)
                     if any(p.before != p.after for p in plans):
@@ -113,9 +121,13 @@ OFF restores future-launch configuration, not already-running processes or TCC.
                     verify_native(home, executable)
                     return old
                 raise ValueError("Turn OFF the existing activation before choosing another agent.")
+            identity = uuid.uuid4().hex
+            if machine_access:
+                from .machine_bindings import augment_plan
+                plans[0] = augment_plan(plans[0], self.root.parent, identity)
             if all(p.before == p.after for p in plans):
                 raise ValueError("OpenClaw already uses these settings; no baseline exists for OFF to restore")
-            record = {"schema": 1, "id": uuid.uuid4().hex, "phase": "enabling",
+            record = {"schema": 1, "id": identity, "phase": "enabling", "machine_access": machine_access,
                       "adapter": "openclaw", "home": str(home), "after_sha256": digest(plans[0].after)}
             self._save(record)
             store = OpenClawStore(self.root / "activations" / record["id"])
@@ -149,6 +161,11 @@ OFF restores future-launch configuration, not already-running processes or TCC.
                 return record
             record["phase"] = "stopping"
             self._save(record)
+            if record.get("machine_access") is True:
+                from .admin import disable
+                revoked = disable(self.root.parent)
+                if isinstance(revoked, dict) and revoked.get("error"):
+                    raise ValueError("Machine access revoked; administrative helper cleanup failed: " + str(revoked["error"]))
             tx = self.root / "activations" / record["id"]
             if record["adapter"] == "openclaw":
                 return self._disable_openclaw(record, tx)
@@ -409,8 +426,52 @@ def guide_mac(dialogs: Dialogs) -> dict | None:
     return status
 
 
+def guide_admin(state: Path, dialogs: Dialogs) -> dict:
+    """One owner UAC decision per active helper, not one popup per command."""
+    from . import admin
+    if platform.system() != "Windows":
+        return admin.status(state)
+    current = admin.status(state)
+    if current.get("status") == "ready" and current.get("elevated") is True:
+        return current
+    pending = current.get("status") == "pending"
+    if pending:
+        choice = dialogs.choose("Administrator approval pending", "An earlier Windows approval has not finished. "
+            "Finish that prompt, or dismiss it and choose cancel and retry below. "
+            "Retry revokes the old approval before asking Windows again; account access stays ON.",
+            ["Cancel pending approval and retry", "Keep pending approval"])
+        if choice != "Cancel pending approval and retry":
+            return current
+    else:
+        choice = dialogs.choose("Administrator access", "Allow your selected agent to run Administrator commands "
+            "while Ballz is ON. Windows will ask you to approve the helper once for this activation. "
+            "After approval, system changes use that helper without repeated Ballz prompts. "
+            "Use your own account; switching to another administrator account is not supported.",
+            ["Approve Administrator access", "Use account access only"])
+        if choice != "Approve Administrator access":
+            return current
+    try:
+        if pending:
+            stopped = admin.disable(state)
+            if stopped.get("status") != "off" or stopped.get("error"):
+                raise ValueError("Pending approval could not be revoked")
+        result = admin.enable(state)
+        if result.get("status") != "ready" or result.get("elevated") is not True:
+            raise ValueError("Administrator helper not ready")
+        return result
+    except (ValueError, OSError, subprocess.SubprocessError, admin.AdminError):
+        current = admin.status(state)
+        detail = ("Approval is still pending. Finish the Windows prompt, or reopen this launcher and choose "
+                  "Cancel pending approval and retry." if current.get("status") == "pending" else
+                  "Approval was declined or the helper could not start. Reopen this launcher to retry Administrator access.")
+        dialogs.message("Administrator access not enabled", detail + " Account-level machine tools remain ON.")
+        return current
+
+
 def check_setup(state: Path) -> dict:
+    from .machine_check import inspect_machine
     return {"agents": discover_agents(), "permissions": permission_snapshot(),
+            "machine_runtime": inspect_machine(),
             "activation": Activation(state).status(), "authentication": "not_read_or_tested",
             "scope": "native terminal launches; existing background agents unchanged"}
 
@@ -421,13 +482,19 @@ def wizard(state: Path, dialogs: Dialogs | None = None) -> int:
     current = controller.status()
     if current["phase"] != "off":
         options = ["Start agent", "Turn OFF", "Close"] if current["phase"] == "on" else ["Recover / turn OFF", "Close"]
+        if (current["phase"] == "on" and current.get("machine_access") is True
+                and platform.system() == "Windows"):
+            options.insert(1, "Administrator access")
         choice = dialogs.choose("Ballz2theWALL — " + current["phase"].upper(),
-            "Your selected agent uses expanded native settings.\n\n"
-            "To turn OFF: close its agent window first. OFF restores previous settings for the next launch. "
-            "It does not stop existing agents or revoke Mac permissions.", options)
+            "Selected agent: machine tools plus expanded native settings. Legacy activations need OFF then ON.\n\n"
+            "OFF disconnects Ballz machine tools and restores prior settings. Close the agent window to stop "
+            "its other tools. Completed work and OS permission grants remain.", options)
         if choice in {"Turn OFF", "Recover / turn OFF"}:
             controller.disable()
             dialogs.message("Ballz2theWALL is OFF", "Previous agent settings restored. Your files and completed work are unchanged.")
+            return 0
+        if choice == "Administrator access":
+            guide_admin(state, dialogs)
             return 0
         if choice == "Start agent":
             return launch_interactive(current, state)
@@ -439,6 +506,12 @@ def wizard(state: Path, dialogs: Dialogs | None = None) -> int:
             "No agent settings or permissions have been changed.")
         return 2
     labels = [f'{a["label"]}\n{a["home"]}' for a in agents]
+    from .machine_check import inspect_machine
+    readiness = inspect_machine()
+    if readiness["status"] != "ready":
+        dialogs.message("Machine tools need repair", "Reinstall Ballz2theWALL, then reopen setup. "
+                        + " ".join(readiness["errors"]))
+        return 2
     choice = labels[0] if len(labels) == 1 else dialogs.choose(
         "Choose your agent", "Choose the agent to connect. Only this profile will change.", labels)
     if choice is None:
@@ -454,21 +527,24 @@ def wizard(state: Path, dialogs: Dialogs | None = None) -> int:
             dialogs.message("Open setup on your desktop", "Open Ballz2theWALL from the Windows Start menu in your signed-in desktop session.")
             return 2
         if dialogs.choose("Windows access", "Normal terminal, file and desktop work uses your Windows account. "
-            "Windows has no blanket permission switch for this. Administrator-only tasks still require a UAC-approved elevated launch. "
-            "This installer does not disable UAC or change other accounts.", ["Continue", "Not now"]) != "Continue":
+            "Ballz adds desktop, browser, file and command tools to your existing agent. After ON, approve "
+            "the Administrator helper for system-level work without repeated command approvals.", ["Continue", "Not now"]) != "Continue":
             return 130
     with Store(state / "controller").lock():
         atomic_write(state / "controller/setup.json", (json.dumps({"schema": 1, "agent": selected,
             "permissions": permissions, "authentication": "native agent handles sign-in"}, indent=2) + "\n").encode())
     choice = dialogs.choose("Ready to turn ON", f'{selected["label"]}\n{selected["home"]}\n\n'
-        "ON applies the supported agent's expanded native settings. No extra Ballz execution popups. "
-        "The agent keeps its own account and tools. Start it from this launcher for the Mac permissions you approved. "
+        "ON connects desktop, browser, file and command tools and applies expanded native settings. "
+        "No extra Ballz execution popups. Your agent keeps its account. Start it here for the Mac permissions you approved. "
         "Already-running agents do not change.", ["Turn ON", "Finish (OFF)"])
     if choice != "Turn ON":
         return 0 if choice == "Finish (OFF)" else 130
-    active = controller.enable(selected["adapter"], Path(selected["home"]))
-    choice = dialogs.choose("Ballz2theWALL is ON", "Open this launcher again to turn OFF. "
-        "Close your agent window before switching OFF. Native settings restore; OS grants remain.", ["Start agent", "Finish"])
+    active = controller.enable(selected["adapter"], Path(selected["home"]), machine_access=True)
+    if permissions["platform"] == "Windows":
+        guide_admin(state, dialogs)
+    choice = dialogs.choose("Ballz2theWALL is ON", "Machine tools connected for the next agent launch. "
+        "Reopen this launcher to turn OFF. OFF disconnects Ballz tools and restores settings; completed work and "
+        "OS grants remain. Other running agent tools are not stopped.", ["Start agent", "Finish"])
     return launch_interactive(active, state) if choice == "Start agent" else 0
 
 
@@ -476,9 +552,10 @@ def launch_interactive(record: dict, state: Path) -> int:
     from .cli import main
     # A GUI shortcut needs a real Windows console for the runtime, not stdin from
     # an installer pipe. CREATE_NEW_CONSOLE does not request Administrator access.
-    argv = ["run", record["adapter"], "--home", record["home"], "--cwd", str(Path.home()), "--interactive"]
+    argv = ["run", record["adapter"], "--home", record["home"], "--cwd", str(Path.home()), "--interactive",
+            "--state-dir", str(state.expanduser().absolute())]
     if platform.system() == "Windows":
-        subprocess.Popen([sys.executable, "-m", "ballz2thewall", *argv],
+        subprocess.Popen([sys.executable, "-I", "-m", "ballz2thewall", *argv],
                          creationflags=subprocess.CREATE_NEW_CONSOLE, close_fds=True)
         return 0
     if platform.system() == "Darwin" and not terminal_responsible():

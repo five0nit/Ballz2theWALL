@@ -25,6 +25,22 @@ POWERSHELL = shutil.which("powershell.exe") or (
 )
 
 
+def assert_machine_runtime(evidence):
+    assert evidence["schema"] == 1
+    assert evidence["status"] == "ready"
+    assert evidence["scope"] == "dependencies_and_native_executable_only"
+    assert evidence["live_permissions"] == "not_tested"
+    assert evidence["errors"] == []
+    assert isinstance(evidence["packages"], dict)
+    for name, pin in {"cua-driver": "0.28.1", "mcp": "1.30.0"}.items():
+        assert evidence["packages"][name]["expected"] == pin
+        assert evidence["packages"][name]["installed"] == pin
+        assert evidence["packages"][name]["importable"] is True
+    assert evidence["desktop_driver"]["status"] == "ready"
+    assert evidence["desktop_driver"]["command"]
+    assert evidence["desktop_driver"]["version"] == "cua-driver 0.28.1"
+
+
 def ps_quote(text: str) -> str:
     return "'" + text.replace("'", "''") + "'"
 
@@ -273,6 +289,7 @@ def test_native_actual_install_and_reinstall():
         assert receipt["profiles_changed"] is False
         assert receipt["shortcut"] is None
         assert receipt["uv_version"] == "0.12.5"
+        assert_machine_runtime(receipt["machine_runtime"])
         assert state.read_text() == '{"preserve": true}'
     # Exercise the real source fallback too, reusing only the private runtime.
     source = scratch / "source checkout"
@@ -288,6 +305,7 @@ def test_native_actual_install_and_reinstall():
     source_receipt = json.loads((root / "runtime/install-receipt.json").read_text(encoding="utf-8-sig"))
     assert source_receipt["package"] == native_path(source)
     assert source_receipt["package_sha256"] is None
+    assert_machine_runtime(source_receipt["machine_runtime"])
     assert state.read_text() == '{"preserve": true}'
     after = powershell(snapshot)
     assert before.returncode == after.returncode == 0

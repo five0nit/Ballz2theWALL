@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "source_version": "0.3.0a0.dev6",
+  "scope": "Repository documentation and static website sync. Fresh automated checks only; no real OS consent, authenticated agent run or signed-in browser acceptance.",
+  "source_suite": {
+    "command": ".venv/bin/python -B -m pytest -q -p no:cacheprovider",
+    "passed": 917,
+    "skipped": 4,
+    "failures": 0,
+    "errors": 0,
+    "elapsed_seconds": 79.59,
+    "receipt_sha256": "bc044900d05828ba40ac5aa0934384008d3780f8242023c42bad6d7d4117ec9b",
+    "scope_note": "Run before final guide/bundled-skill copy refresh; runtime Python and installer code unchanged by that refresh."
+  },
+  "final_source_rerun": {
+    "command": ".venv/bin/python -B -m pytest -q -p no:cacheprovider",
+    "passed": 917,
+    "skipped": 4,
+    "failures": 0,
+    "elapsed_seconds": 91.07,
+    "scope_note": "Rerun after final guide and bundled-skill copy refresh. Output observed directly; earlier XML hash above remains the earlier run."
+  },
+  "post_skill_copy_checks": {
+    "command": ".venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_core.py tests/test_cli.py tests/test_installer_release.py",
+    "passed": 60,
+    "skipped": 0,
+    "failures": 0,
+    "elapsed_seconds": 0.76
+  },
+  "fresh_wheel_smoke": {
+    "name": "ballz2thewall-0.3.0a0.dev6-py3-none-any.whl",
+    "sha256": "52f6ce03da6f35f92298cd13076548cd6e7a25ffbff635bf6c07f146445bfce8",
+    "result": "passed",
+    "checks": ["clean temporary environment install", "installed console version and machine command help", "temporary Hermes config apply/rollback restored exact bytes", "installed bundled skill contains dev6 metadata and machine_job guidance"],
+    "installed_wheel_full_suite_rerun": false,
+    "machine_activation": false,
+    "agent_authentication": false,
+    "os_consent": false,
+    "published": false
+  },
+  "local_website": {
+    "passed": 4,
+    "cases": ["1440px desktop", "390px touch", "320px reduced motion", "390px no JavaScript"],
+    "horizontal_overflow": false,
+    "console_errors": 0,
+    "failed_requests": 0,
+    "switch_touch_keyboard_and_faq": "passed",
+    "published_download_links": "v0.2.0a2",
+    "visual_review": "desktop and phone screenshots inspected"
+  },
+  "static_checks": {
+    "ruff": "passed",
+    "node_check": "passed",
+    "git_diff_check": "passed",
+    "local_markdown_links_missing": 0,
+    "site_repository_links_missing": 0
+  },
+  "publication_boundary": "Source and docs may be published. No new version tag or installer release; pending owner and distribution acceptance unchanged."
+}

@@ -1,63 +1,86 @@
-# Verification — 0.2.0a2 unsigned alpha
+# Verification — 0.3.0a0.dev6 source candidate
 
-Machine-readable evidence: [gates.json](verification/0.2.0a2/gates.json).
-Previous evidence remains under [0.2.0a1](VERIFICATION-0.2.0a1.md) and
-[0.1.1](VERIFICATION-0.1.1.md); old artifacts were not replaced.
+**Automated candidate evidence exists; public-release and owner acceptance are
+not complete.** Published downloads remain
+[v0.2.0a2](https://github.com/five0nit/Ballz2theWALL/releases/tag/v0.2.0a2), whose
+original verification page is preserved unchanged at
+[VERIFICATION-0.2.0a2.md](VERIFICATION-0.2.0a2.md).
 
-## Passing release gates
+Machine-readable, publication-safe summary:
+[release-readiness/public-summary.json](verification/release-readiness/public-summary.json).
+Raw local logs can contain private paths and are not required public downloads.
 
-- Source: **537 passed, 4 skipped**. Ruff and whitespace checks passed.
-- Fresh, non-editable Python 3.11 wheel: **537 passed, 4 skipped**. Both installed
-  console entrypoints, four adapters' scratch round trips, and bundled skill
-  install/rollback exercised outside source imports.
-- OpenClaw targeted tests: **77 passed**. Independent spec review PASS and
-  code-quality review APPROVED; final reviewer independently ran the same 77 tests.
-- Native OpenClaw **2026.6.1**: **10 checks** including real CLI capability detection,
-  native config validation, two effective policy scopes, ON/OFF idempotence,
-  byte-identical restoration, restrictive-policy/schema negative controls,
-  unsupported profile rejection and ambient-home override pinning.
-- Native Windows x64 installer: **13 passed**, including private Python bootstrap,
-  wheel install, reinstall, source fallback, no global PATH or Start Menu changes,
-  PowerShell parsing, invalid-payload controls and COM shortcut readback.
-- Native Windows installed-wheel core/store/installer: **48 passed, 2 skipped**. Eight native
-  store smoke groups pass; Windows ACLs are checked as ACLs, not POSIX bits.
-- Info page: four browser cases at 1440, 390 and 320 CSS pixels; keyboard/touch preview
-  switch, FAQ disclosure, download anchor, reduced motion and no-JavaScript fallback.
-  No horizontal overflow or console errors. Desktop and phone screenshots visually reviewed.
-- ZIP contents, Mac executable bit, SHA-256 manifests and embedded wheel equality checked.
+Fresh repository/site checks are recorded separately in
+[dev6-docs-update.json](verification/dev6-docs-update.json): source **917 passed /
+4 skipped**, final bundled-skill/CLI/core/installer checks **60 passed**, a clean
+rebuilt-wheel CLI round trip, and four local desktop/mobile/fallback browser cases.
+No live owner acceptance was performed. The saved evidence below remains bound
+to its original artifacts.
 
-Source/fresh-wheel skips are the opt-in network installation test and native-only
-Windows tests. Installation and Windows cases are exercised separately.
-The two native-Windows skips are the POSIX permission-mode test and the separately
-executed opt-in installation test.
+## Saved dev6 automated evidence
 
-## Audit corrections
+| Gate | Recorded result | Scope |
+| --- | --- | --- |
+| Source regression | **917 passed, 4 skipped** | Source candidate tested in the recorded run |
+| Clean installed Python 3.11 wheel | **917 passed, 4 skipped** | Separate non-editable installed-wheel run |
+| Native Windows installed-wheel scope | **241 passed, 1 skipped** | Selected Windows tests, not a duplicate full-suite claim |
+| Native Windows scratch activation/OFF | **5 passed** | Scratch controller state; not existing authenticated-agent acceptance |
+| Clean wheel with 640-digit integer policy | **198 passed** | Decimal/wire robustness scope |
+| Non-elevated long jobs | **125 seconds on WSL and native Windows** | Completed with live output and disk-marker verification under a 120-second MCP client request timeout |
+| Native Windows install/reinstall | **Passed in scratch** | Isolated paths; real profiles, PATH and shortcuts preserved |
 
-- Removed incompatible legacy exec security/ask fields when writing modern OpenClaw mode.
-- Pinned its separate native approval-home resolver; named/custom layouts are rejected.
-- Reject explicit ACP/other per-agent runtime overrides before writes.
-- Hardened Mac interpreter isolation and preflight; tested immutable installer wheel snapshots.
-- Corrected narrow-phone heading overflow and platform-specific test expectations.
-- First WSL-to-Windows invocation failed with `UtilAcceptVsock` before application
-  execution. The complete installer suite was rerun successfully; failures were not reclassified.
-- Historical secret scan: three false positives individually examined: two source-file
-  SHA-256 metadata entries and one printed CLI credential-reference syntax. Exact
-  historical fingerprints alone are allowlisted in `.gitleaksignore`; no path-wide exemptions.
+These are separate runs, not an additive total of unique tests. Saved artifact
+checks matched packaged source, wheel RECORD entries and the embedded wheel in
+both installer ZIPs. Independent specification and quality reviews approved the
+scoped Administrator-job lifecycle/integration work, not whole-product acceptance.
+A scoped secret review reported no unresolved findings; it was not a new universal
+scan of every historical file.
 
-GitHub clean-runner failures additionally exposed a Windows-toolchain skip-order
-bug, default Administrators ownership on elevated lock-file creation, and a
-PowerShell 7 module-path inheritance conflict. Fixed with early toolchain checks,
-explicit current-user lock descriptors and a temporary built-in module path.
-Regression tests preserve full native coverage; no failing Windows job was removed.
+The saved test/artifact receipts are bound to their recorded candidate bytes.
+Updating README or the bundled skill changes package inputs: future rebuilt
+artifacts need their own hashes and applicable package checks. Do not attach the
+old artifact checksums to a rebuilt wheel or claim its gates were rerun here.
 
-## Explicitly outside acceptance
+## Owner and distribution gates still open
 
-Real Mac installer/permission prompts/Terminal TCC attribution, Windows ARM64,
-authenticated model execution, signing/notarization and a universal desktop-control
-companion remain **unverified or unimplemented**. The Mac ZIP is experimental.
-No model calls, real agent-home activation, OS grant changes or gateway restarts
-were performed. Native parser/policy checks are not model-session tests.
+1. **Genuine Windows elevation:** owner-present UAC, observed same-user elevated
+   helper, a harmless actual elevated job, cancellation/cleanup and OFF. Injected
+   privilege detection in scratch tests does not satisfy this gate.
+2. **Signed-in browser:** owner-approved session access preserving existing
+   profiles/logins. A disposable browser is not an authenticated-browser test.
+3. **Current authenticated agent:** dev6 startup in the selected existing agent,
+   connected machine MCP, real tool call, ON/OFF revocation and exact config
+   restoration. Historical dev3 authenticated success is not dev6 proof; Claude
+   authenticated startup remains separately unverified.
+4. **Normal consumer path:** test the exact candidate downloaded archive through
+   first install, launcher, selected-agent connection and OFF. Scratch installer
+   checks do not establish first-run OS prompts, ordinary shortcuts or consumer UX.
+5. **Mac/platform acceptance:** physical Mac installer, Terminal TCC attribution,
+   grant denial/retry and desktop access; Windows ARM64 is also unverified.
+   Mac remains experimental.
+6. **Distribution:** complete transitive license review and candidate artifact
+   acceptance. Dependency metadata inventory alone is not legal clearance.
+   Bundles remain unsigned/not notarized; signing and first-run OS acceptance are
+   required before a frictionless consumer-distribution claim.
 
-OpenClaw uses the default local `.openclaw` layout on Linux/WSL; Mac source support
-is not a hardware acceptance claim. Read [OPENCLAW.md](OPENCLAW.md) for exact scope.
-OFF restores stored settings; it does not stop existing agents or undo their work.
+No firmware/bootloader implementation or verification is claimed. Windows
+Administrator is not SYSTEM, kernel or firmware authority. OFF revokes managed
+access; it does not undo completed task effects or revoke persistent OS grants.
+
+## Historical evidence is not replaced
+
+- **v0.2.0a2:** published native-runtime controller;
+  [unchanged release verification](VERIFICATION-0.2.0a2.md).
+- **Earlier development:** dev1 disposable native Windows desktop/browser and
+  installer checks, dev3 command-job and authenticated-agent receipts, and dev5
+  decimal-wire checks remain historical. They establish only their recorded scope
+  and version, not final dev6 acceptance.
+- **Older releases:** [0.2.0a1](VERIFICATION-0.2.0a1.md) and
+  [0.1.1](VERIFICATION-0.1.1.md).
+
+The documentation refresh does not perform model calls, real-home activation,
+UAC approval, signed-in browser access, gateway restarts or after-hours owner
+acceptance. It does not replace immutable historical receipts.
+
+[Changelog](../CHANGELOG.md) · [Capabilities](CONSUMER-ACCESS.md) ·
+[Command lifecycle](COMMAND-JOBS.md) · [Design](DESIGN.md)

@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ballz2thewall"
-version = "0.2.0a2"
-description = "Full-access runtime profiles. Native adapters. Receipts, not magic prompts."
+version = "0.3.0a0.dev6"
+description = "Owner-approved machine control for existing agents: desktop, browser, files and administration."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{name = "Michael Costea"}]
-dependencies = ["PyYAML>=6.0.2,<7", "tomlkit>=0.13.2,<1", "json5>=0.15,<0.16"]
+dependencies = ["PyYAML>=6.0.2,<7", "tomlkit>=0.13.2,<1", "json5>=0.15,<0.16", "mcp==1.30.0", "cua-driver==0.28.1"]
 classifiers = ["Development Status :: 3 - Alpha", "Operating System :: POSIX :: Linux", "Operating System :: Microsoft :: Windows", "Operating System :: MacOS", "Programming Language :: Python :: 3"]
 
 [project.optional-dependencies]

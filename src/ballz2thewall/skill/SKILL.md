@@ -1,9 +1,9 @@
 ---
 name: ballz2thewall
-description: Use when enabling native full-access agent runtimes. Configure Hermes, OpenAI Codex, Anthropic Claude Code and local OpenClaw with explicit homes, credential references and reversible receipts.
+description: Use when enabling owner-approved agent machine access. Configure explicit runtime homes, manage ON/OFF and command jobs, and preserve native authentication and rollback receipts.
 license: MIT
 metadata:
-  version: 0.2.0a2
+  version: 0.3.0a0.dev6
   platforms: [linux, macos, windows, wsl]
 ---
 
@@ -11,102 +11,126 @@ metadata:
 
 **Less asking. More doing. Actual permissions, not magic prompts.**
 
-Use for operator-requested native full-access runtime setup. This skill is an
-interface to the `ballz` CLI, not an override of provider instructions or a
-credential extractor. Loading the skill makes no machine changes.
+This skill describes **0.3.0a0.dev6 development source**. Published **v0.2.0a2**
+installers contain native runtime settings only, not the dev6 machine bridge,
+background jobs or Windows helper. Final live owner/distribution acceptance is
+pending. Loading this skill never activates access or requests OS permission.
 
-## Guided setup
+## Operator workflow
 
-For nontechnical users, extract the platform Setup ZIP and double-click its
-installer. It installs private Python, then launches `ballz setup --gui`.
-Use the installed shortcut to reopen setup. macOS 11+ guidance requests access
-for Terminal, which launches setup and the agent. Native Mac acceptance remains
-pending; do not label those requests runtime-verified.
+1. Check `ballz --version`. If absent, install the reviewed repository or an
+   explicitly supplied immutable wheel; do not assume a PyPI release exists.
+2. Run `ballz doctor`, `ballz machine check` and `ballz setup --check`. These check
+   CLI/package/driver readiness, not model login, signed-in browser access or
+   genuine OS approval.
+3. Select the exact intended home. Respect `HERMES_HOME`, `CODEX_HOME` and
+   `CLAUDE_CONFIG_DIR`; another profile is not an implicit target. Keep one state
+   directory throughout the workflow.
+4. Preview native settings with `ballz plan hermes --home /absolute/runtime/home`.
+   This is not a preview of the additional machine-binding transaction.
+5. For approved managed access, use `ballz on hermes --home /absolute/runtime/home`
+   or `ballz setup --gui`. ON creates the activation and applicable MCP binding.
+   Resolve existing runtime-only activation with OFF before enabling machine access.
+6. Launch the selected existing agent with
+   `ballz run hermes --home /absolute/runtime/home --cwd /absolute/workspace --interactive`.
+   This requires a TTY. `--prompt-file task.txt` supports a bounded one-shot task;
+   `--dry-run` resolves no credentials and makes no model call.
+7. Inspect `ballz status`; finish with **`ballz off`**. Do not substitute plain
+   receipt rollback for revoking a managed activation. Retain receipts and resolve
+   drift or cleanup failures rather than overwriting later edits.
 
-`ballz setup --check` checks status without requesting grants. `ballz on AGENT
---home PATH` owns a reversible configuration transaction; `ballz off` restores
-its original settings. Close the agent first: OFF does not kill running agents
-or revoke OS grants. Do not imply universal desktop or administrative access.
+Restart only the selected agent when needed to load new bindings. Existing live
+gateways are not restarted automatically; obtain separate approval before doing so.
+Use `codex`/`openai`, `claude`/`anthropic`, `hermes` or scoped local `openclaw`.
+These are native agent adapters, not remote provider permission switches.
 
-Installing this skill alone never runs permission setup or activates a profile.
-The user completes OS approvals and the agent's own sign-in personally.
+## Managed capabilities
 
-## Operate
+- `machine_status`: inspect the current activation and capability state.
+- `machine_exec`: explicit command argument array and working directory, using
+  the launching account's rights unless approved Windows administration is requested.
+- `machine_file`: bounded read/write/list/stat operations under current OS rights.
+- `machine_job`: session-owned background command status, output and cancellation.
+- Dynamic `desktop_` tools: desktop/browser/application operations from pinned
+  **cua-driver 0.28.1**, exposed through local stdio with **mcp 1.30.0**.
 
-1. Verify the controller: `ballz --version`. If absent, install from the reviewed
-   local repository with `uv tool install /absolute/path/to/Ballz2theWALL`, or
-   install the supplied immutable wheel. Never guess a published package exists.
-2. Run `ballz doctor`. This checks CLI availability and native permission flags;
-   it does not prove model login, OS elevation or browser authentication.
-3. Identify the exact intended runtime home. Respect `HERMES_HOME`, `CODEX_HOME`,
-   and `CLAUDE_CONFIG_DIR`; do not assume another agent/profile is the target.
-4. Preview: `ballz plan hermes --home /absolute/runtime/home`.
-5. Persist only on the operator's requested scope:
-   `ballz apply hermes --home /absolute/runtime/home`.
-   Keep the returned `receipt_id` and state directory. Future processes read the
-   config; do not restart live gateways to apply it without separate approval.
-6. Or launch without persisting config:
-   `ballz run hermes --home /absolute/runtime/home --cwd /absolute/workspace --prompt-file task.txt`.
-   This starts a real agent. `--dry-run` prints the launch contract without
-   resolving credentials or calling a model. `--interactive` requires a TTY.
-   Explicit Hermes roots are pinned against sticky profile selection; named
-   profile homes stay pinned without rewriting `active_profile`. Native backend
-   precedence includes legacy `env_type`; stored messaging cwd is superseded
-   by the selected local CLI working directory.
-7. Roll back: `ballz rollback RECEIPT_ID`. With a custom `--state-dir`, repeat it.
-   Interrupted rollback can be retried with the same receipt; already-restored
-   original bytes/absence are acknowledged without rewriting the target.
-   Drift is an error, not permission to overwrite someone else's later edits.
+For long commands use `background:true`, keep the returned handle and poll through
+`machine_job`. `timeout:0` removes the command deadline; it does not remove an MCP
+client timeout or make a job survive session teardown. Output is bounded. Do not
+claim cancellation completed merely because a request was accepted.
 
-Use `codex`/`openai` for OpenAI Codex and `claude`/`anthropic` for Claude Code.
-These are runtime adapters, not SDK permission switches for remote model APIs.
+Windows Administrator commands require a separately owner-approved, activation-bound
+UAC helper and `administrator:true`. Missing approval fails visibly; commands never
+silently downgrade or prompt for UAC themselves. Pending approval can be cancelled
+and retried from setup. No always-on privileged service is installed. Administrator
+is not SYSTEM, kernel, bootloader or firmware access.
 
-## OpenClaw
+Desktop tools run on the runtime's host. WSL is not a native Windows desktop bridge.
+Signed-in browser access and physical Mac permission attribution remain separate
+acceptance gates, not consequences of successfully importing the driver.
 
-Use `ballz on openclaw --home "$HOME/.openclaw"`, then `ballz run openclaw
---home "$HOME/.openclaw" --cwd "$PWD" --interactive`. ON validates native schema
-and host policy; OFF restores config and approvals. Linux/WSL/macOS only;
-default `.openclaw` layout, no named profiles or remote nodes/gateways. Run
-requires prior ON/apply. The thin terminal prompt loop forwards each message
-to native `agent --local` with one session ID; no daemon is started. Native
-OpenClaw takes prompt text in `--message`, so it appears in child argv; dry-run
-redacts it. Configured OpenClaw workspace rules remain native. No browser adapter.
+## Runtime bindings
 
-## Browser and credentials
+- Hermes/Codex: selected-home `mcp_servers.ballz2thewall_machine` registration.
+- Claude Code: inline `--mcp-config` only on a managed launch for the matching ON
+  home; no MCP write into `settings.json` or unrelated `~/.claude.json`.
+- OpenClaw: `mcp.servers.ballz2thewall_machine`, subject to native schema and
+  effective-policy validation. Default `.openclaw` layout on Linux/WSL/macOS only;
+  no native Windows, named profiles or remote nodes/gateways. The terminal wrapper
+  calls `agent --local` without starting a gateway. Native `--message` puts prompt
+  text in child argv; dry-run redacts it. Configured workspace rules remain native.
 
-- Hermes: pass an explicit existing HTTP(S) Chrome debugging endpoint with
-  `--cdp http://127.0.0.1:9222`. Probe metadata via
-  `ballz browser-check http://127.0.0.1:9222`.
-- Claude: `ballz run claude ... --chrome` enables the native Chrome extension
-  integration. Extension installation/pairing and supported host OS are separate.
-- Codex: configure a browser MCP with the native CLI; no pretend CDP adapter.
-- Existing OAuth/login stores remain the native runtime's responsibility. No
-  copying between homes. A new empty home is not automatically authenticated.
-- Bind one selected credential at launch:
-  `--secret API_KEY=env:MY_API_KEY`,
-  `--secret API_KEY=op:op://Vault/Item/field`, or
-  `--secret API_KEY=keyring:service/account`.
-  1Password requires an authenticated `op` CLI; keyring needs the optional extra.
-  References only; never insert literal secrets into commands or prompts.
-- For Codex shell tools to inherit secret-named variables, explicitly add
-  `--inherit-secrets`. Existing explicit shell exclude rules still apply.
-- Chrome sessions support authenticated browsing, not extraction of saved
-  passwords, cookie databases, decryption keys or bypass of OS unlock prompts.
+`ballz apply AGENT --home PATH` persists **native settings only**, returning a
+receipt for `ballz rollback RECEIPT_ID`. `run` itself does not persist settings or
+activate machine access. With a custom `--state-dir`, repeat it for every operation.
+Explicit Hermes roots are pinned against sticky profile selection; backend precedence
+honors `terminal.backend` before legacy `terminal.env_type`. Selected `--cwd` takes
+precedence over stored messaging cwd.
+
+## OFF and restoration
+
+OFF marks the activation non-active before restoring saved config bytes or absence.
+Old/new managed calls fail; connected servers close and managed commands receive
+asynchronous cancellation. The owned driver/helper is part of cleanup. Drift,
+missing/corrupt receipts or incomplete cleanup remain visible and can require retry.
+
+OFF does not undo completed files/commands/browser actions, revoke OS grants, stop
+the agent's unrelated tools or guarantee termination of detached descendants. Close
+the agent window to stop that session. The older alpha's OFF restores runtime settings
+only. Keep backups private: they can contain pre-existing config credentials.
+
+## Browser, credentials and dependency privacy
+
+- Hermes native CDP route: pass an explicitly approved existing endpoint with
+  `--cdp http://127.0.0.1:9222`; `ballz browser-check` probes `/json/version` only.
+- Claude native Chrome route: `ballz run claude ... --chrome`; extension pairing,
+  installed prerequisites and host support are independent of the managed driver.
+- Codex has no `--cdp` adapter; managed driver browser tools are available through MCP.
+- Native logins stay in their own homes. Never copy login stores or infer an empty
+  home is authenticated. No password/cookie database extraction or OS-unlock bypass.
+- Selected child credentials use references such as `--secret API_KEY=env:MY_API_KEY`,
+  `--secret API_KEY=op:op://Vault/Item/field` or
+  `--secret API_KEY=keyring:service/account`. 1Password requires its authenticated
+  official CLI; keyring needs the optional extra. Never put literal secrets in argv.
+- Codex `--inherit-secrets` changes its default secret-name filter; existing explicit
+  exclusions remain. Ballz receipts omit resolved values; child tools and logs can
+  still expose values they use.
+
+Ballz requires no hosted account. While connected, its local MCP server owns a
+`cua-driver mcp --direct --no-overlay` process, not the user's shared daemon.
+Cua has separate default-on telemetry and `cua-driver telemetry` controls; do not
+claim the full stack is telemetry-free. Agent/provider logging, networking and
+transitive licensing have their own boundaries.
 
 ## Verify honestly
 
-Check the generated receipt, a fresh `ballz plan` reporting `changed: false`, and
-an operator-scoped real task. Report configuration write, native parsing, model
-execution and browser login as separate checks. Do not substitute a mock result
-for actual native runtime success.
+Report configuration write, parser success, connection, authenticated tool execution,
+OS approval, browser preservation, OFF and package provenance separately. Historical
+dev3 agent success does not certify dev6. Windows mocks/scratch installs do not certify
+real UAC or a normal downloaded first launch. Mac remains experimental until tested
+on physical hardware. Automated counts are not owner acceptance.
 
-OS permissions, managed policies, explicit deny rules, provider rules and tool
-availability remain independent limits. Hermes instruction-file protection and
-scanning are not disabled. No root escalation, firewall mutation, obfuscation,
-profile scraping or blanket machine-wide rollout. Native agent stdout and
-session logs remain controlled by that agent; keep secrets out of its prompts.
-
-YAML/JSON apply can reformat files; rollback restores exact original bytes.
-Backups may contain existing config credentials and stay in the private local
-state directory, outside repositories. Only install this skill into an explicit
-skills root: `ballz skill --dest /absolute/skills/root`.
+Provider rules, native deny policies and OS protections remain relevant. No automatic
+machine-wide rollout, hidden persistence, profile scraping or OS-protection changes.
+Install this skill only into an explicitly selected root with
+`ballz skill --dest /absolute/skills/root`; installation itself grants no access.

@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "source_version": "0.3.0a0.dev6",
+  "published_download_version": "v0.2.0a2",
+  "development_installer_released": false,
+  "release_ready": false,
+  "scope": "Sanitized summary of previously saved candidate receipts. Not a fresh full-suite run, not current owner acceptance, and not proof of a newly rebuilt package after documentation changes.",
+  "evidence_origin": {
+    "base_commit": "9dadba39e7b3cac75f3702abe50f9bdcef15d568",
+    "candidate_was_uncommitted_at_test_time": true,
+    "raw_logs": "Retained locally; not included because they contain host-specific details.",
+    "independent_reproduction": "Run the checked-in test suite and acceptance procedures on the intended release artifact. Receipt digests identify local evidence; summaries alone do not reproduce it."
+  },
+  "saved_test_receipts": [
+    {
+      "name": "source-tests.xml",
+      "tests": 921,
+      "passed": 917,
+      "skipped": 4,
+      "failures": 0,
+      "errors": 0,
+      "sha256": "c351b920fa9a78054f195681bd4ce820ed1f59066c76f334a77918df388bf8b4"
+    },
+    {
+      "name": "wheel-tests.xml",
+      "tests": 921,
+      "passed": 917,
+      "skipped": 4,
+      "failures": 0,
+      "errors": 0,
+      "sha256": "f9beb45eedd15494d4e6ed28df23880421a09b3eacde616cca51690b61c432f4"
+    },
+    {
+      "name": "native-tests.xml",
+      "scope": "Native Windows subset, not the complete suite",
+      "tests": 242,
+      "passed": 241,
+      "skipped": 1,
+      "failures": 0,
+      "errors": 0,
+      "sha256": "c610f976984ee564ab0dcaac8a04049872e5bcdaabca53a3427ad09efe783168"
+    }
+  ],
+  "saved_execution_evidence": {
+    "windows_clean_install_and_reinstall": "passed in isolated scratch locations; normal consumer path not accepted",
+    "long_running_commands": {
+      "platforms": ["Windows", "WSL"],
+      "duration_seconds": 125,
+      "mcp_client_timeout_seconds": 120,
+      "result": "passed",
+      "genuine_elevation": false
+    },
+    "authenticated_hermes": "earlier dev3 only; does not establish dev6 acceptance",
+    "browser": "disposable-browser interaction only; signed-in-session acceptance remains pending"
+  },
+  "pending_acceptance": [
+    "Owner-present Windows UAC approval, real elevated command/job, cleanup and OFF",
+    "Approved signed-in browser access with profiles and logins preserved",
+    "Authenticated dev6 agent to machine MCP to real tool call to OFF and exact restoration",
+    "Authenticated Claude startup",
+    "Complete transitive and platform-specific dependency license/redistribution/telemetry review",
+    "Broader native Windows CI coverage for machine/admin functions",
+    "Final artifact rebuild, hashes and normal downloaded-installer/first-launch/shortcuts/OFF acceptance",
+    "Physical Mac installation, TCC attribution, desktop use and restoration before supported Mac distribution",
+    "Signing/notarization or explicit unsigned-alpha distribution scope",
+    "Owner approval for new release publication"
+  ],
+  "unchanged_boundaries": {
+    "mac": "experimental",
+    "openclaw": "local machine MCP binding implemented with native schema/policy validation; default .openclaw layout only on Linux/WSL/macOS, not native Windows or remote nodes",
+    "kernel_system_firmware": "not implemented as managed capabilities",
+    "off": "revokes Ballz-managed access and restores saved configuration; not undo of completed tasks, detached descendants, unrelated agents or OS permission grants"
+  }
+}

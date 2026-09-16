@@ -19,9 +19,9 @@
     button.setAttribute('aria-pressed', String(on));
     plate.dataset.state = on ? 'on' : 'off';
     state.textContent = on ? 'ON' : 'OFF';
-    label.textContent = on ? 'Native full access' : 'Saved settings';
+    label.textContent = on ? 'Machine access' : 'Saved settings';
     hint.textContent = on
-      ? 'Preview ON. In the app, ON changes the selected runtime’s execution settings.'
-      : 'Preview OFF. In the app, OFF restores settings—not running tasks or OS grants.';
+      ? 'Preview ON. Dev6 connects machine tools to the selected agent. OS approval still applies.'
+      : 'Preview OFF. Dev6 revokes Ballz access and restores settings—not completed work or OS grants.';
   });
 })();

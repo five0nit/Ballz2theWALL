@@ -8,3 +8,19 @@ dist/
 .env
 *.bak
 .ballz-state/
+
+# Local acceptance evidence can include host paths and browser/profile details.
+# Publish reviewed, sanitized summaries instead of raw machine receipts.
+/Microsoft/
+/docs/verification/command-jobs/
+/docs/verification/consumer-access/
+/docs/verification/decimal-wire/
+/docs/verification/owner-acceptance/
+/docs/verification/timeout-overflow/
+/docs/verification/release-readiness/*
+!/docs/verification/release-readiness/public-summary.json
+/docs/discovery/COMMAND-JOBS.json
+/docs/discovery/CONSUMER-ACCESS.json
+/docs/discovery/CONSUMER-INSTALLER-CONTINUATION.json
+/docs/discovery/EXTENDED-REACH.json
+/docs/discovery/RELEASE-READINESS.json
