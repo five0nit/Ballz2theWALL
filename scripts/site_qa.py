@@ -9,6 +9,62 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 
+def check_typography(browser, url, out):
+    """Check text ranges, not only boxes, across system-font fallbacks."""
+    rows = []
+    widths = [320, 360, 390, 412, 620, 621, 768, 800, 801, 1024, 1100, 1440]
+    fonts = {'native': None, 'sans': 'sans-serif', 'wide': '"DejaVu Sans", sans-serif'}
+    for label, font in fonts.items():
+        context = browser.new_context(viewport={'width': 390, 'height': 844},
+                                      is_mobile=True, has_touch=True,
+                                      java_script_enabled=False)
+        page = context.new_page()
+        response = page.goto(url, wait_until='networkidle')
+        assert response and response.status == 200
+        if font:
+            # Changing user agent does not change installed fonts on the QA host.
+            page.evaluate('(font) => document.documentElement.style.setProperty("--heading", font)', font)
+        for width in widths:
+            page.set_viewport_size({'width': width, 'height': 844})
+            geometry = page.evaluate('''() => {
+                const headings = [...document.querySelectorAll('h1, h2')].map(e => {
+                    const box = e.getBoundingClientRect();
+                    const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+                    const rects = [];
+                    let node;
+                    while ((node = walker.nextNode())) {
+                        if (!node.textContent.trim()) continue;
+                        const range = document.createRange();
+                        range.selectNodeContents(node);
+                        for (const r of range.getClientRects()) {
+                            rects.push({left:r.left, right:r.right, top:r.top});
+                        }
+                    }
+                    return {text:e.textContent, font:getComputedStyle(e).fontFamily,
+                            size:getComputedStyle(e).fontSize, rects,
+                            left:box.left, right:box.right,
+                            clipped:rects.some(r => r.left < box.left - 1 || r.right > box.right + 1)};
+                });
+                return {width:innerWidth, scroll:document.documentElement.scrollWidth,
+                        heroLines:new Set(headings[0].rects.map(r => r.top)).size, headings};
+            }''')
+            passed = (geometry['width'] == width and geometry['scroll'] <= width
+                      and geometry['heroLines'] == 3
+                      and not any(h['clipped'] for h in geometry['headings']))
+            rows.append({'font': label, 'width': width, 'passed': passed, **geometry})
+            if width in (390, 1440):
+                page.screenshot(path=str(out / f'typography-{label}-{width}.png'))
+        context.close()
+    receipt = {'url': url, 'cases': rows, 'passed': sum(r['passed'] for r in rows)}
+    (out / 'typography.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    failures = [{'font': r['font'], 'width': r['width'], 'scroll': r['scroll'],
+                 'heroLines': r['heroLines'],
+                 'clipped': [h['text'] for h in r['headings'] if h['clipped']]}
+                for r in rows if not r['passed']]
+    assert not failures, failures
+    return {'passed': receipt['passed'], 'total': len(rows)}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--url', required=True)
@@ -80,8 +136,9 @@ def main():
                          'preview': 'on/off+keyboard' if scripting else 'disabled fallback',
                          'screenshot':f'{name}.png'})
             context.close()
+        typography = check_typography(browser, args.url, args.out)
         browser.close()
-    receipt = {'url':args.url,'cases':rows,'passed':len(rows)}
+    receipt = {'url':args.url,'cases':rows,'passed':len(rows),'typography':typography}
     (args.out / 'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print(json.dumps(receipt,indent=2))
 
